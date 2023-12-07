@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Instrument;
 use App\Repository\InstrumentRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,13 +21,9 @@ class InstrumentController extends AbstractController
     }
 
     #[Route('/api/instruments/{id}', name: 'api_instrument_detail', methods: ['GET'])]
-    public function getInstrumentDetail(int $id, InstrumentRepository $instrumentRepository, SerializerInterface $serializer): JsonResponse
+    public function getInstrumentDetail(Instrument $instrument, SerializerInterface $serializer): JsonResponse
     {
-        $instrument = $instrumentRepository->find($id);
-        if($instrument){
-            $jsonInstrument = $serializer->serialize($instrument, 'json');
-            return new JsonResponse ($jsonInstrument, Response::HTTP_OK, [], true);
-        }
-        return new JsonResponse ("Instrument not found", Response::HTTP_NOT_FOUND);
+        $jsonInstrument = $serializer->serialize($instrument, 'json');
+        return new JsonResponse($jsonInstrument, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 }
