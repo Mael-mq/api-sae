@@ -2,18 +2,31 @@
 
 namespace App\Controller;
 
+use App\Repository\InstrumentRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class InstrumentController extends AbstractController
 {
     #[Route('/api/instruments', name: 'api_instrument', methods: ['GET'])]
-    public function getInstruments(): JsonResponse
+    public function getInstrumentList(InstrumentRepository $instrumentRepository, SerializerInterface $serializer): JsonResponse
     {
-        return new JsonResponse ([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/InstrumentController.php',
-        ]);
+        $instrumentList = $instrumentRepository->findAll();
+        $jsonInstrumentList = $serializer->serialize($instrumentList, 'json');
+        return new JsonResponse ($jsonInstrumentList, Response::HTTP_OK, [], true);
+    }
+
+    #[Route('/api/instruments/{id}', name: 'api_instrument_detail', methods: ['GET'])]
+    public function getInstrumentDetail(int $id, InstrumentRepository $instrumentRepository, SerializerInterface $serializer): JsonResponse
+    {
+        $instrument = $instrumentRepository->find($id);
+        if($instrument){
+            $jsonInstrument = $serializer->serialize($instrument, 'json');
+            return new JsonResponse ($jsonInstrument, Response::HTTP_OK, [], true);
+        }
+        return new JsonResponse ("Instrument not found", Response::HTTP_NOT_FOUND);
     }
 }
