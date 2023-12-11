@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\CoursAppRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CoursAppRepository::class)]
 class CoursApp
@@ -17,14 +18,17 @@ class CoursApp
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(["coursApp:read"])]
+    #[Assert\NotBlank(message: "Le titre du cours est obligatoire")]
     private ?string $Title = null;
 
     #[ORM\ManyToOne(inversedBy: 'coursApps')]
     #[Groups(["coursApp:read"])]
+    #[Assert\NotBlank(message: "L'instrument du cours est obligatoire ou n'existe pas")]
     private ?Instrument $Instrument = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(["coursApp:read"])]
+    #[Assert\NotBlank(message: "La difficulté du cours est obligatoire")]
     private ?string $Difficulty = null;
 
     public function getId(): ?int
