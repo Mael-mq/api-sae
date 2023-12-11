@@ -16,14 +16,14 @@ class InstrumentController extends AbstractController
     public function getInstrumentList(InstrumentRepository $instrumentRepository, SerializerInterface $serializer): JsonResponse
     {
         $instrumentList = $instrumentRepository->findAll();
-        $jsonInstrumentList = $serializer->serialize($instrumentList, 'json');
-        return new JsonResponse ($jsonInstrumentList, Response::HTTP_OK, [], true);
+        $jsonInstrumentList = $serializer->serialize($instrumentList, 'json', ['groups' => 'instrument:read']);
+        return new JsonResponse ($jsonInstrumentList, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
     #[Route('/api/instruments/{id}', name: 'api_instrument_detail', methods: ['GET'])]
     public function getInstrumentDetail(Instrument $instrument, SerializerInterface $serializer): JsonResponse
     {
-        $jsonInstrument = $serializer->serialize($instrument, 'json');
+        $jsonInstrument = $serializer->serialize($instrument, 'json', ['groups' => 'instrument:read']);
         return new JsonResponse($jsonInstrument, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 }

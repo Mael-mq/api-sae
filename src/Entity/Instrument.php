@@ -14,11 +14,11 @@ class Instrument
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["coursApp:read"])]
+    #[Groups(["coursApp:read", "instrument:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["coursApp:read"])]
+    #[Groups(["coursApp:read", "instrument:read"])]
     private ?string $Name = null;
 
     #[ORM\OneToMany(mappedBy: 'Instrument', targetEntity: CoursApp::class)]
