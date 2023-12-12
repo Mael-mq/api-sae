@@ -21,6 +21,13 @@ class CoursAppRepository extends ServiceEntityRepository
         parent::__construct($registry, CoursApp::class);
     }
 
+    public function findAllWithPagination($offset, $limit) {
+        $qb = $this->createQueryBuilder('b')
+            ->setFirstResult(($offset - 1) * $limit)
+            ->setMaxResults($limit);
+        return $qb->getQuery()->getResult();
+    }
+
 //    /**
 //     * @return CoursApp[] Returns an array of CoursApp objects
 //     */

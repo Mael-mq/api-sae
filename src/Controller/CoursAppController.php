@@ -21,9 +21,13 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class CoursAppController extends AbstractController
 {
     #[Route('/api/cours-app', name: 'api_cours_app', methods: ['GET'])]
-    public function getCoursAppList(CoursAppRepository $coursAppRepository, SerializerInterface $serializer): JsonResponse
+    public function getCoursAppList(CoursAppRepository $coursAppRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
-        $coursAppList = $coursAppRepository->findAll();
+        $offset = $request->get('offset', 1);
+        $limit = $request->get('limit', 5);
+
+        $coursAppList = $coursAppRepository->findAllWithPagination($offset, $limit);
+        
         $jsonCoursAppList = $serializer->serialize($coursAppList, 'json', ['groups' => 'coursApp:read']);
         return new JsonResponse ($jsonCoursAppList, Response::HTTP_OK, ['accept' => 'json'], true);
     }
