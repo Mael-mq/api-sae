@@ -4,15 +4,49 @@ namespace App\DataFixtures;
 
 use App\Entity\CoursApp;
 use App\Entity\Instrument;
+use App\Entity\User;
 use App\Repository\InstrumentRepository;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
+    private $userPasswordHasher;
+    
+    public function __construct(UserPasswordHasherInterface $userPasswordHasher)
+    {
+        $this->userPasswordHasher = $userPasswordHasher;
+    }
     public function load(ObjectManager $manager): void
     {
+        // Création d'un user "normal"
+        $user = new User();
+        $user->setEmail("user@mmi.fr");
+        $user->setRoles(["ROLE_USER"]);
+        $user->setPassword($this->userPasswordHasher->hashPassword($user, "password"));
+        $manager->persist($user);
+        
+        // Création d'un user admin
+        $userAdmin = new User();
+        $userAdmin->setEmail("admin@mmi.fr");
+        $userAdmin->setRoles(["ROLE_ADMIN"]);
+        $userAdmin->setPassword($this->userPasswordHasher->hashPassword($userAdmin, "password"));
+        $manager->persist($userAdmin);
+
+        $userTeacher = new User();
+        $userTeacher->setEmail("teacher@mmi.fr");
+        $userTeacher->setRoles(["ROLE_USER", "ROLE_TEACHER"]);
+        $userTeacher->setPassword($this->userPasswordHasher->hashPassword($userTeacher, "password"));
+        $manager->persist($userTeacher);
+
+        $userStudent = new User();
+        $userStudent->setEmail("student@mmi.fr");
+        $userStudent->setRoles(["ROLE_USER", "ROLE_STUDENT"]);
+        $userStudent->setPassword($this->userPasswordHasher->hashPassword($userStudent, "password"));
+        $manager->persist($userStudent);
+
         $faker = Factory::create('fr_FR');
         $instruments = [
             "Guitare",

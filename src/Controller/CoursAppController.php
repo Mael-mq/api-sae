@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -34,7 +35,9 @@ class CoursAppController extends AbstractController
         return new JsonResponse($jsonCoursApp, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
+    
     #[Route('/api/cours-app/{id}', name: 'api_cours_app_delete', methods: ['DELETE'])]
+    #[IsGranted("ROLE_ADMIN", message: "Vous n'avez pas les droits suffisants.")]
     public function deleteCoursApp(CoursApp $coursApp, EntityManagerInterface $em): JsonResponse
     {
         $em->remove($coursApp);
@@ -43,6 +46,7 @@ class CoursAppController extends AbstractController
     }
 
     #[Route('/api/cours-app', name: 'api_cours_app_create', methods: ['POST'])]
+    #[IsGranted("ROLE_ADMIN", message: "Vous n'avez pas les droits suffisants.")]
     public function createCoursApp(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, InstrumentRepository $instrumentRepository, ValidatorInterface $validator): JsonResponse
     {
         $coursApp = $serializer->deserialize($request->getContent(), CoursApp::class, 'json');
@@ -73,6 +77,7 @@ class CoursAppController extends AbstractController
     }
 
     #[Route('/api/cours-app/{id}', name: 'api_cours_app_update', methods: ['PUT'])]
+    #[IsGranted("ROLE_ADMIN", message: "Vous n'avez pas les droits suffisants.")]
     public function updateCoursApp(Request $request, SerializerInterface $serializer, CoursApp $currentCoursApp, EntityManagerInterface $em, InstrumentRepository $instrumentRepository, ValidatorInterface $validator): JsonResponse 
     {
         $updatedCoursApp = $serializer->deserialize($request->getContent(), 
