@@ -33,7 +33,7 @@ class CoursAppController extends AbstractController
     }
 
     #[Route('/api/cours-app/{id}', name: 'api_cours_app_detail', methods: ['GET'])]
-    public function getInstrumentDetail(CoursApp $coursApp, SerializerInterface $serializer): JsonResponse
+    public function getCoursAppDetail(CoursApp $coursApp, SerializerInterface $serializer): JsonResponse
     {
         $jsonCoursApp = $serializer->serialize($coursApp, 'json', ['groups' => 'coursApp:read']);
         return new JsonResponse($jsonCoursApp, Response::HTTP_OK, ['accept' => 'json'], true);

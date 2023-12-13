@@ -21,6 +21,13 @@ class ExerciceAppRepository extends ServiceEntityRepository
         parent::__construct($registry, ExerciceApp::class);
     }
 
+    public function findAllWithPagination($offset, $limit) {
+        $qb = $this->createQueryBuilder('b')
+            ->setFirstResult(($offset - 1) * $limit)
+            ->setMaxResults($limit);
+        return $qb->getQuery()->getResult();
+    }
+
 //    /**
 //     * @return ExerciceApp[] Returns an array of ExerciceApp objects
 //     */

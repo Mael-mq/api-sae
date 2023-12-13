@@ -6,6 +6,7 @@ use App\Repository\ExerciceAppRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ExerciceAppRepository::class)]
 class ExerciceApp
@@ -13,8 +14,10 @@ class ExerciceApp
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['exerciceApp:read'])]
     private ?int $id = null;
 
+    #[Groups(['exerciceApp:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $title = null;
 

@@ -19,11 +19,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['userInstrument:read'])]
+    #[Groups(['userInstrument:read', 'user:read'])]
     private ?string $email = null;
 
     #[ORM\Column]
-    #[Groups(['userInstrument:read'])]
+    #[Groups(['userInstrument:read', 'user:read'])]
     private array $roles = [];
 
     /**
