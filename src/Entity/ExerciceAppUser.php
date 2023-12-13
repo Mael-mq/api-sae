@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ExerciceAppUserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ExerciceAppUserRepository::class)]
 class ExerciceAppUser
@@ -11,14 +12,18 @@ class ExerciceAppUser
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['exerciceAppUser:read'])]
     private ?int $id = null;
 
+    #[Groups(['exerciceAppUser:read'])]
     #[ORM\ManyToOne(inversedBy: 'exerciceAppUsers')]
     private ?ExerciceApp $ExerciceApp = null;
 
+    #[Groups(['exerciceAppUser:read'])]
     #[ORM\ManyToOne(inversedBy: 'exerciceAppUsers')]
     private ?User $User = null;
 
+    #[Groups(['exerciceAppUser:read'])]
     #[ORM\Column]
     private ?bool $isFinished = null;
 

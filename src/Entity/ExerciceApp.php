@@ -14,10 +14,10 @@ class ExerciceApp
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['exerciceApp:read'])]
+    #[Groups(['exerciceApp:read', 'exerciceAppUser:read'])]
     private ?int $id = null;
 
-    #[Groups(['exerciceApp:read'])]
+    #[Groups(['exerciceApp:read', 'exerciceAppUser:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $title = null;
 
