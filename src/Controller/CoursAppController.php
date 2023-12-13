@@ -61,7 +61,7 @@ class CoursAppController extends AbstractController
         // Récupération de l'idInstrument. S'il n'est pas défini, alors on met -1 par défaut.
         $idInstrument = $content['idInstrument'] ?? -1;
 
-        // On cherche l'auteur qui correspond et on l'assigne au livre.
+        // On cherche l'instrument qui correspond et on l'assigne au cours.
         // Si "find" ne trouve pas l'instrument, alors null sera retourné.
         $coursApp->setInstrument($instrumentRepository->find($idInstrument));
 

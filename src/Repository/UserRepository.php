@@ -5,6 +5,8 @@ namespace App\Repository;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
@@ -20,9 +22,14 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
-    public function __construct(ManagerRegistry $registry)
+    private JWTTokenManagerInterface $jwtManager;
+    private TokenStorageInterface $tokenStorage;
+
+    public function __construct(ManagerRegistry $registry, TokenStorageInterface $tokenStorage, JWTTokenManagerInterface $jwtManager)
     {
         parent::__construct($registry, User::class);
+        $this->jwtManager = $jwtManager;
+        $this->tokenStorage = $tokenStorage;
     }
 
     /**
@@ -37,6 +44,13 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user->setPassword($newHashedPassword);
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
+    }
+
+    public function getUserFromToken(): ?User
+    {
+        $decodedJwtToken = $this->jwtManager->decode($this->tokenStorage->getToken());
+        $user = $this->findOneBy(['email' => $decodedJwtToken['username']]);
+        return $user;
     }
 
 //    /**

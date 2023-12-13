@@ -3,9 +3,12 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -16,9 +19,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Groups(['userInstrument:read'])]
     private ?string $email = null;
 
     #[ORM\Column]
+    #[Groups(['userInstrument:read'])]
     private array $roles = [];
 
     /**
@@ -26,6 +31,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     private ?string $password = null;
+
+    #[ORM\OneToMany(mappedBy: 'User', targetEntity: UserInstrument::class)]
+    private Collection $userInstruments;
+
+    public function __construct()
+    {
+        $this->userInstruments = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -104,6 +117,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    /**
+     * @return Collection<int, UserInstrument>
+     */
+    public function getUserInstruments(): Collection
+    {
+        return $this->userInstruments;
+    }
+
+    public function addUserInstrument(UserInstrument $userInstrument): static
+    {
+        if (!$this->userInstruments->contains($userInstrument)) {
+            $this->userInstruments->add($userInstrument);
+            $userInstrument->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserInstrument(UserInstrument $userInstrument): static
+    {
+        if ($this->userInstruments->removeElement($userInstrument)) {
+            // set the owning side to null (unless already changed)
+            if ($userInstrument->getUser() === $this) {
+                $userInstrument->setUser(null);
+            }
+        }
+
+        return $this;
     }
 
 
