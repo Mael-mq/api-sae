@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CoursAppRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -30,6 +32,14 @@ class CoursApp
     #[Groups(["coursApp:read"])]
     #[Assert\NotBlank(message: "La difficulté du cours est obligatoire")]
     private ?string $Difficulty = null;
+
+    #[ORM\OneToMany(mappedBy: 'CoursApp', targetEntity: CoursAppUser::class)]
+    private Collection $coursAppUsers;
+
+    public function __construct()
+    {
+        $this->coursAppUsers = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -68,6 +78,36 @@ class CoursApp
     public function setDifficulty(?string $Difficulty): static
     {
         $this->Difficulty = $Difficulty;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CoursAppUser>
+     */
+    public function getCoursAppUsers(): Collection
+    {
+        return $this->coursAppUsers;
+    }
+
+    public function addCoursAppUser(CoursAppUser $coursAppUser): static
+    {
+        if (!$this->coursAppUsers->contains($coursAppUser)) {
+            $this->coursAppUsers->add($coursAppUser);
+            $coursAppUser->setCoursApp($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCoursAppUser(CoursAppUser $coursAppUser): static
+    {
+        if ($this->coursAppUsers->removeElement($coursAppUser)) {
+            // set the owning side to null (unless already changed)
+            if ($coursAppUser->getCoursApp() === $this) {
+                $coursAppUser->setCoursApp(null);
+            }
+        }
 
         return $this;
     }

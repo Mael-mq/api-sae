@@ -35,9 +35,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'User', targetEntity: UserInstrument::class)]
     private Collection $userInstruments;
 
+    #[ORM\OneToMany(mappedBy: 'User', targetEntity: CoursAppUser::class)]
+    private Collection $coursAppUsers;
+
+    #[ORM\OneToMany(mappedBy: 'User', targetEntity: ExerciceAppUser::class)]
+    private Collection $exerciceAppUsers;
+
     public function __construct()
     {
         $this->userInstruments = new ArrayCollection();
+        $this->coursAppUsers = new ArrayCollection();
+        $this->exerciceAppUsers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -143,6 +151,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($userInstrument->getUser() === $this) {
                 $userInstrument->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CoursAppUser>
+     */
+    public function getCoursAppUsers(): Collection
+    {
+        return $this->coursAppUsers;
+    }
+
+    public function addCoursAppUser(CoursAppUser $coursAppUser): static
+    {
+        if (!$this->coursAppUsers->contains($coursAppUser)) {
+            $this->coursAppUsers->add($coursAppUser);
+            $coursAppUser->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCoursAppUser(CoursAppUser $coursAppUser): static
+    {
+        if ($this->coursAppUsers->removeElement($coursAppUser)) {
+            // set the owning side to null (unless already changed)
+            if ($coursAppUser->getUser() === $this) {
+                $coursAppUser->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ExerciceAppUser>
+     */
+    public function getExerciceAppUsers(): Collection
+    {
+        return $this->exerciceAppUsers;
+    }
+
+    public function addExerciceAppUser(ExerciceAppUser $exerciceAppUser): static
+    {
+        if (!$this->exerciceAppUsers->contains($exerciceAppUser)) {
+            $this->exerciceAppUsers->add($exerciceAppUser);
+            $exerciceAppUser->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeExerciceAppUser(ExerciceAppUser $exerciceAppUser): static
+    {
+        if ($this->exerciceAppUsers->removeElement($exerciceAppUser)) {
+            // set the owning side to null (unless already changed)
+            if ($exerciceAppUser->getUser() === $this) {
+                $exerciceAppUser->setUser(null);
             }
         }
 
