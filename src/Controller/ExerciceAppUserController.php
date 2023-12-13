@@ -20,7 +20,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class ExerciceAppUserController extends AbstractController
 {
     #[Route('/api/exercice-app-user', name: 'api_exercice_app_user', methods: ['GET'])]
-    public function getExerciceAppList(UserRepository $userRepository, ExerciceAppUserRepository $exerciceAppUserRepository, SerializerInterface $serializer): JsonResponse
+    public function getExerciceAppUserList(UserRepository $userRepository, ExerciceAppUserRepository $exerciceAppUserRepository, SerializerInterface $serializer): JsonResponse
     {
         $exerciceAppUserList = $exerciceAppUserRepository->findBy(['User'=>$userRepository->getUserFromToken()]);
         
@@ -29,7 +29,7 @@ class ExerciceAppUserController extends AbstractController
     }
 
     #[Route('/api/exercice-app-user/{id}', name: 'api_exercice_app_user_detail', methods: ['GET'])]
-    public function getExerciceAppDetail(UserRepository $userRepository, ExerciceAppUser $exerciceAppUser, SerializerInterface $serializer): JsonResponse
+    public function getExerciceAppUserDetail(UserRepository $userRepository, ExerciceAppUser $exerciceAppUser, SerializerInterface $serializer): JsonResponse
     {
         // Vérifier que l'utilisateur connecté est bien celui qui veut récupérer l'exercice
         $userRequest = $exerciceAppUser->getUser()->getUserIdentifier();
@@ -56,8 +56,8 @@ class ExerciceAppUserController extends AbstractController
 
         $updatedExerciceAppUser = $serializer->deserialize($request->getContent(), ExerciceAppUser::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $currentExerciceAppUser]);
         
-        $currentExerciceAppUser->setExerciceApp($currentExerciceAppUser->getExerciceApp());
-        $currentExerciceAppUser->setUser($currentExerciceAppUser->getUser());
+        $updatedExerciceAppUser->setExerciceApp($currentExerciceAppUser->getExerciceApp());
+        $updatedExerciceAppUser->setUser($currentExerciceAppUser->getUser());
 
         // Validation des données
         $errors = $validator->validate($updatedExerciceAppUser);

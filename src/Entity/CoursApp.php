@@ -15,21 +15,21 @@ class CoursApp
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["coursApp:read"])]
+    #[Groups(["coursApp:read", 'coursAppUser:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["coursApp:read"])]
+    #[Groups(["coursApp:read", 'coursAppUser:read'])]
     #[Assert\NotBlank(message: "Le titre du cours est obligatoire")]
     private ?string $Title = null;
 
     #[ORM\ManyToOne(inversedBy: 'coursApps')]
-    #[Groups(["coursApp:read"])]
+    #[Groups(["coursApp:read", 'coursAppUser:read'])]
     #[Assert\NotBlank(message: "L'instrument du cours est obligatoire ou n'existe pas")]
     private ?Instrument $Instrument = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["coursApp:read"])]
+    #[Groups(["coursApp:read", 'coursAppUser:read'])]
     #[Assert\NotBlank(message: "La difficulté du cours est obligatoire")]
     private ?string $Difficulty = null;
 
