@@ -55,7 +55,7 @@ class CoursAppController extends AbstractController
     {
         $coursApp = $serializer->deserialize($request->getContent(), CoursApp::class, 'json');
         
-        // Récupération de l'ensemble des données envoyées sous forme de tableau
+        // Récupération de l'ensemble des données envoyées sous forme de tableau 
         $content = $request->toArray();
 
         // Récupération de l'idInstrument. S'il n'est pas défini, alors on met -1 par défaut.
