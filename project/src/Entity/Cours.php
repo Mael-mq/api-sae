@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CoursRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -13,7 +15,7 @@ class Cours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:read', 'seance:read'])]
     private ?int $id = null;
 
     #[Groups(['cours:read'])]
@@ -25,6 +27,14 @@ class Cours
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[Assert\NotBlank(message: "Le prof est obligatoire ou n'existe pas")]
     private ?Teacher $Teacher = null;
+
+    #[ORM\OneToMany(mappedBy: 'Cours', targetEntity: Seance::class)]
+    private Collection $seances;
+
+    public function __construct()
+    {
+        $this->seances = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -51,6 +61,36 @@ class Cours
     public function setTeacher(?Teacher $Teacher): static
     {
         $this->Teacher = $Teacher;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Seance>
+     */
+    public function getSeances(): Collection
+    {
+        return $this->seances;
+    }
+
+    public function addSeance(Seance $seance): static
+    {
+        if (!$this->seances->contains($seance)) {
+            $this->seances->add($seance);
+            $seance->setCours($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSeance(Seance $seance): static
+    {
+        if ($this->seances->removeElement($seance)) {
+            // set the owning side to null (unless already changed)
+            if ($seance->getCours() === $this) {
+                $seance->setCours(null);
+            }
+        }
 
         return $this;
     }
