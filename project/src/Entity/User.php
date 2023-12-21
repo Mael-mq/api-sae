@@ -16,15 +16,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read', 'cours:read'])]
+    #[Groups(['user:read', 'cours:read', 'messages:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['userInstrument:read', 'user:read', 'exerciceAppUser:read', 'coursAppUser:read', 'student:read', 'teacher:read', 'cours:read'])]
+    #[Groups(['userInstrument:read', 'user:read', 'exerciceAppUser:read', 'coursAppUser:read', 'student:read', 'teacher:read', 'cours:read', 'messages:read'])]
     private ?string $email = null;
 
     #[ORM\Column]
-    #[Groups(['userInstrument:read', 'user:read', 'exerciceAppUser:read', 'coursAppUser:read', 'student:read', 'teacher:read', 'cours:read'])]
+    #[Groups(['userInstrument:read', 'user:read', 'exerciceAppUser:read', 'coursAppUser:read', 'student:read', 'teacher:read', 'cours:read', 'messages:read'])]
     private array $roles = [];
 
     /**

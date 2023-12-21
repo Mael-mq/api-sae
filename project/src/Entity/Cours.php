@@ -15,7 +15,7 @@ class Cours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:read', 'seance:read'])]
+    #[Groups(['cours:read', 'seance:read', 'messages:read'])]
     private ?int $id = null;
 
     #[Groups(['cours:read'])]
@@ -31,9 +31,13 @@ class Cours
     #[ORM\OneToMany(mappedBy: 'Cours', targetEntity: Seance::class)]
     private Collection $seances;
 
+    #[ORM\OneToMany(mappedBy: 'Cours', targetEntity: Messages::class)]
+    private Collection $messages;
+
     public function __construct()
     {
         $this->seances = new ArrayCollection();
+        $this->messages = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -89,6 +93,36 @@ class Cours
             // set the owning side to null (unless already changed)
             if ($seance->getCours() === $this) {
                 $seance->setCours(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Messages>
+     */
+    public function getMessages(): Collection
+    {
+        return $this->messages;
+    }
+
+    public function addMessage(Messages $message): static
+    {
+        if (!$this->messages->contains($message)) {
+            $this->messages->add($message);
+            $message->setCours($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMessage(Messages $message): static
+    {
+        if ($this->messages->removeElement($message)) {
+            // set the owning side to null (unless already changed)
+            if ($message->getCours() === $this) {
+                $message->setCours(null);
             }
         }
 
