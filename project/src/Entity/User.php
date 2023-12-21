@@ -48,6 +48,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'User', targetEntity: Student::class)]
     private Collection $students;
 
+    #[ORM\OneToMany(mappedBy: 'User', targetEntity: VaultSheet::class)]
+    private Collection $vaultSheets;
+
     public function __construct()
     {
         $this->userInstruments = new ArrayCollection();
@@ -55,6 +58,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->exerciceAppUsers = new ArrayCollection();
         $this->teachers = new ArrayCollection();
         $this->students = new ArrayCollection();
+        $this->vaultSheets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -280,6 +284,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($student->getUser() === $this) {
                 $student->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, VaultSheet>
+     */
+    public function getVaultSheets(): Collection
+    {
+        return $this->vaultSheets;
+    }
+
+    public function addVaultSheet(VaultSheet $vaultSheet): static
+    {
+        if (!$this->vaultSheets->contains($vaultSheet)) {
+            $this->vaultSheets->add($vaultSheet);
+            $vaultSheet->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVaultSheet(VaultSheet $vaultSheet): static
+    {
+        if ($this->vaultSheets->removeElement($vaultSheet)) {
+            // set the owning side to null (unless already changed)
+            if ($vaultSheet->getUser() === $this) {
+                $vaultSheet->setUser(null);
             }
         }
 
