@@ -6,6 +6,7 @@ use App\Repository\SheetRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: SheetRepository::class)]
 class Sheet
@@ -13,12 +14,15 @@ class Sheet
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['sheet:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['sheet:read'])]
     private ?string $title = null;
 
     #[ORM\ManyToOne(inversedBy: 'sheets')]
+    #[Groups(['sheet:read'])]
     private ?Instrument $Instrument = null;
 
     #[ORM\OneToMany(mappedBy: 'Sheet', targetEntity: VaultSheet::class)]

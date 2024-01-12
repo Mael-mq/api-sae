@@ -21,6 +21,13 @@ class SheetRepository extends ServiceEntityRepository
         parent::__construct($registry, Sheet::class);
     }
 
+    public function findAllWithPagination($offset, $limit) {
+        $qb = $this->createQueryBuilder('b')
+            ->setFirstResult(($offset - 1) * $limit)
+            ->setMaxResults($limit);
+        return $qb->getQuery()->getResult();
+    }
+
 //    /**
 //     * @return Sheet[] Returns an array of Sheet objects
 //     */

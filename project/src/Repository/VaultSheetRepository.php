@@ -21,6 +21,13 @@ class VaultSheetRepository extends ServiceEntityRepository
         parent::__construct($registry, VaultSheet::class);
     }
 
+    public function findAllWithPagination($offset, $limit) {
+        $qb = $this->createQueryBuilder('b')
+            ->setFirstResult(($offset - 1) * $limit)
+            ->setMaxResults($limit);
+        return $qb->getQuery()->getResult();
+    }
+
 //    /**
 //     * @return VaultSheet[] Returns an array of VaultSheet objects
 //     */
