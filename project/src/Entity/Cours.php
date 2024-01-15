@@ -15,7 +15,7 @@ class Cours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:read', 'seance:read', 'messages:read'])]
+    #[Groups(['cours:read', 'seance:read', 'messages:read', 'files:read'])]
     private ?int $id = null;
 
     #[Groups(['cours:read'])]
@@ -28,16 +28,22 @@ class Cours
     #[Assert\NotBlank(message: "Le prof est obligatoire ou n'existe pas")]
     private ?Teacher $Teacher = null;
 
+    #[Groups(['cours:read'])]
     #[ORM\OneToMany(mappedBy: 'Cours', targetEntity: Seance::class)]
     private Collection $seances;
 
     #[ORM\OneToMany(mappedBy: 'Cours', targetEntity: Messages::class)]
     private Collection $messages;
 
+    #[Groups(['cours:read'])]
+    #[ORM\OneToMany(mappedBy: 'Cours', targetEntity: Files::class)]
+    private Collection $files;
+
     public function __construct()
     {
         $this->seances = new ArrayCollection();
         $this->messages = new ArrayCollection();
+        $this->files = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -123,6 +129,36 @@ class Cours
             // set the owning side to null (unless already changed)
             if ($message->getCours() === $this) {
                 $message->setCours(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Files>
+     */
+    public function getFiles(): Collection
+    {
+        return $this->files;
+    }
+
+    public function addFile(Files $file): static
+    {
+        if (!$this->files->contains($file)) {
+            $this->files->add($file);
+            $file->setCours($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFile(Files $file): static
+    {
+        if ($this->files->removeElement($file)) {
+            // set the owning side to null (unless already changed)
+            if ($file->getCours() === $this) {
+                $file->setCours(null);
             }
         }
 
