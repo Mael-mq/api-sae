@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SheetRepository::class)]
 class Sheet
@@ -14,19 +15,29 @@ class Sheet
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['sheet:read'])]
+    #[Groups(['sheet:read', 'vaultSheet:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['sheet:read'])]
+    #[Groups(['sheet:read', 'vaultSheet:read'])]
+    #[Assert\NotBlank(message: "Le titre de la partition est obligatoire")]
     private ?string $title = null;
 
     #[ORM\ManyToOne(inversedBy: 'sheets')]
-    #[Groups(['sheet:read'])]
+    #[Groups(['sheet:read', 'vaultSheet:read'])]
+    #[Assert\NotBlank(message: "L'instrument est obligatoire ou n'existe pas")]
     private ?Instrument $Instrument = null;
 
     #[ORM\OneToMany(mappedBy: 'Sheet', targetEntity: VaultSheet::class)]
     private Collection $vaultSheets;
+
+    #[Groups(['sheet:read'])]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $scoreKey = null;
+
+    #[Groups(['sheet:read'])]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $author = null;
 
     public function __construct()
     {
@@ -88,6 +99,30 @@ class Sheet
                 $vaultSheet->setSheet(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getScoreKey(): ?string
+    {
+        return $this->scoreKey;
+    }
+
+    public function setScoreKey(?string $scoreKey): static
+    {
+        $this->scoreKey = $scoreKey;
+
+        return $this;
+    }
+
+    public function getAuthor(): ?string
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?string $author): static
+    {
+        $this->author = $author;
 
         return $this;
     }
