@@ -41,22 +41,23 @@ class SeanceController extends AbstractController
     }
 
     
-    #[Route('/api/seances/{id}', name: 'api_seances_delete', methods: ['DELETE'])]
-    public function deleteSeance(Seance $coursApp, EntityManagerInterface $em): JsonResponse
+    #[Route('/api/cours/{idCours}/seances/{idSeance}', name: 'api_seances_delete', methods: ['DELETE'])]
+    public function deleteSeance(SeanceRepository $seanceRepository, Request $request, EntityManagerInterface $em): JsonResponse
     {
-        $em->remove($coursApp);
+        $seance = $seanceRepository->find($request->attributes->get('idSeance'));
+
+        $em->remove($seance);
         $em->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-    #[Route('/api/seances', name: 'api_seances_create', methods: ['POST'])]
+    #[Route('/api/cours/{idCours}/seances', name: 'api_seances_create', methods: ['POST'])]
     public function createSeance(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, CoursRepository $coursRepository, ValidatorInterface $validator): JsonResponse
     {
         $seance = $serializer->deserialize($request->getContent(), Seance::class, 'json');
         
-        $content = $request->toArray();
-        $idCours = $content['idCours'] ?? -1;
-        $seance->setCours($coursRepository->find($idCours));
+        $cours = $coursRepository->find($request->attributes->get('idCours'));
+        $seance->setCours($cours);
 
         // Validation des données
         $errors = $validator->validate($seance);
@@ -68,14 +69,16 @@ class SeanceController extends AbstractController
         $em->flush();
 
         $jsonSeance = $serializer->serialize($seance, 'json', ['groups' => 'seance:read']);
-        $location = $urlGenerator->generate('api_seances_detail', ['id' => $seance->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+        $location = $urlGenerator->generate('api_seances_detail', ['idSeance' => $seance->getId(), 'idCours' => $seance->getCours()->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         return new JsonResponse($jsonSeance, Response::HTTP_CREATED, ["Location" => $location], true);
     }
 
-    #[Route('/api/seances/{id}', name: 'api_seances_update', methods: ['PUT'])]
-    public function updateSeance(Request $request, SerializerInterface $serializer, Seance $currentSeance, EntityManagerInterface $em, ValidatorInterface $validator, CoursRepository $coursRepository): JsonResponse 
+    #[Route('/api/cours/{idCours}/seances/{idSeance}', name: 'api_seances_update', methods: ['PUT'])]
+    public function updateSeance(Request $request, SeanceRepository $seanceRepository, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator, CoursRepository $coursRepository): JsonResponse 
     {
+        $currentSeance = $seanceRepository->find($request->attributes->get('idSeance'));
+
         $updatedSeance = $serializer->deserialize($request->getContent(), 
                 Seance::class, 
                 'json', 
