@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Cours;
 use App\Entity\Seance;
 use App\Repository\CoursRepository;
 use App\Repository\SeanceRepository;
@@ -19,12 +20,10 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class SeanceController extends AbstractController
 {
-    #[Route('/api/seances', name: 'api_seances', methods: ['GET'])]
+    #[Route('/api/cours/{idCours}/seances', name: 'api_seances', methods: ['GET'])]
     public function getSeanceList(SeanceRepository $seanceRepository, CoursRepository $coursRepository, UserRepository $userRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
-        $content = $request->toArray();
-        $idCours = $content['idCours'] ?? -1;
-        $cours = $coursRepository->find($idCours);
+        $cours = $coursRepository->find($request->attributes->get('idCours'));
 
         $seanceList = $seanceRepository->findBy(['Cours'=>$cours]);
         
@@ -32,9 +31,11 @@ class SeanceController extends AbstractController
         return new JsonResponse ($jsonSeanceList, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
-    #[Route('/api/seances/{id}', name: 'api_seances_detail', methods: ['GET'])]
-    public function getSeanceDetail(Seance $seance, SerializerInterface $serializer): JsonResponse
+    #[Route('/api/cours/{idCours}/seances/{idSeance}', name: 'api_seances_detail', methods: ['GET'])]
+    public function getSeanceDetail(SeanceRepository $seanceRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
+        $seance = $seanceRepository->find($request->attributes->get('idSeance'));
+
         $jsonCoursApp = $serializer->serialize($seance, 'json', ['groups' => 'seance:read']);
         return new JsonResponse($jsonCoursApp, Response::HTTP_OK, ['accept' => 'json'], true);
     }
