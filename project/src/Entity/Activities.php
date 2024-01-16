@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\ActivitiesRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ActivitiesRepository::class)]
 class Activities
@@ -12,20 +14,30 @@ class Activities
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['activities:read'])]
     private ?int $id = null;
 
+    #[Groups(['activities:read'])]
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\NotBlank(message: "Le titre est obligatoire")]
     private ?string $title = null;
 
+    #[Groups(['activities:read'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\NotBlank(message: "Le contenu est obligatoire")]
     private ?string $content = null;
 
+    #[Groups(['activities:read'])]
     #[ORM\ManyToOne(inversedBy: 'activities')]
+    #[Assert\NotBlank(message: "Le cours est obligatoire ou n'existe pas")]
     private ?Cours $Cours = null;
 
+    #[Groups(['activities:read'])]
     #[ORM\ManyToOne(inversedBy: 'activities')]
+    #[Assert\NotBlank(message: "La séance est obligatoire ou n'existe pas")]
     private ?Seance $Seance = null;
 
+    #[Groups(['activities:read'])]
     #[ORM\ManyToOne(inversedBy: 'activities')]
     private ?Sheet $Sheet = null;
 

@@ -15,7 +15,7 @@ class Cours
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['cours:read', 'seance:read', 'messages:read', 'files:read'])]
+    #[Groups(['cours:read', 'seance:read', 'messages:read', 'files:read', 'activities:read'])]
     private ?int $id = null;
 
     #[Groups(['cours:read'])]
