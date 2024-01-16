@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\SeanceRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -31,6 +33,14 @@ class Seance
     #[Groups(['seance:read'])]
     #[Assert\NotBlank(message: "Date de fin obligatoire")]
     private ?\DateTimeInterface $endAt = null;
+
+    #[ORM\OneToMany(mappedBy: 'Seance', targetEntity: Activities::class)]
+    private Collection $activities;
+
+    public function __construct()
+    {
+        $this->activities = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -69,6 +79,36 @@ class Seance
     public function setEndAt(?\DateTimeInterface $endAt): static
     {
         $this->endAt = $endAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Activities>
+     */
+    public function getActivities(): Collection
+    {
+        return $this->activities;
+    }
+
+    public function addActivity(Activities $activity): static
+    {
+        if (!$this->activities->contains($activity)) {
+            $this->activities->add($activity);
+            $activity->setSeance($this);
+        }
+
+        return $this;
+    }
+
+    public function removeActivity(Activities $activity): static
+    {
+        if ($this->activities->removeElement($activity)) {
+            // set the owning side to null (unless already changed)
+            if ($activity->getSeance() === $this) {
+                $activity->setSeance(null);
+            }
+        }
 
         return $this;
     }

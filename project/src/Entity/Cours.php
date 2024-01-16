@@ -39,11 +39,15 @@ class Cours
     #[ORM\OneToMany(mappedBy: 'Cours', targetEntity: Files::class)]
     private Collection $files;
 
+    #[ORM\OneToMany(mappedBy: 'Cours', targetEntity: Activities::class)]
+    private Collection $activities;
+
     public function __construct()
     {
         $this->seances = new ArrayCollection();
         $this->messages = new ArrayCollection();
         $this->files = new ArrayCollection();
+        $this->activities = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -159,6 +163,36 @@ class Cours
             // set the owning side to null (unless already changed)
             if ($file->getCours() === $this) {
                 $file->setCours(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Activities>
+     */
+    public function getActivities(): Collection
+    {
+        return $this->activities;
+    }
+
+    public function addActivity(Activities $activity): static
+    {
+        if (!$this->activities->contains($activity)) {
+            $this->activities->add($activity);
+            $activity->setCours($this);
+        }
+
+        return $this;
+    }
+
+    public function removeActivity(Activities $activity): static
+    {
+        if ($this->activities->removeElement($activity)) {
+            // set the owning side to null (unless already changed)
+            if ($activity->getCours() === $this) {
+                $activity->setCours(null);
             }
         }
 

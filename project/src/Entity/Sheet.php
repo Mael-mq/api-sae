@@ -39,9 +39,13 @@ class Sheet
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $author = null;
 
+    #[ORM\OneToMany(mappedBy: 'Sheet', targetEntity: Activities::class)]
+    private Collection $activities;
+
     public function __construct()
     {
         $this->vaultSheets = new ArrayCollection();
+        $this->activities = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -123,6 +127,36 @@ class Sheet
     public function setAuthor(?string $author): static
     {
         $this->author = $author;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Activities>
+     */
+    public function getActivities(): Collection
+    {
+        return $this->activities;
+    }
+
+    public function addActivity(Activities $activity): static
+    {
+        if (!$this->activities->contains($activity)) {
+            $this->activities->add($activity);
+            $activity->setSheet($this);
+        }
+
+        return $this;
+    }
+
+    public function removeActivity(Activities $activity): static
+    {
+        if ($this->activities->removeElement($activity)) {
+            // set the owning side to null (unless already changed)
+            if ($activity->getSheet() === $this) {
+                $activity->setSheet(null);
+            }
+        }
 
         return $this;
     }
