@@ -22,7 +22,7 @@ class CoursController extends AbstractController
     #[Route('/api/cours', name: 'api_cours', methods: ['GET'])]
     public function getCoursList(UserRepository $userRepository, TeacherRepository $teacherRepository, StudentRepository $studentRepository, CoursRepository $coursRepository, SerializerInterface $serializer): JsonResponse
     {
-        $user = $userRepository->getUserFromToken();
+        $user = $userRepository->getUserFromToken();   
         if ($user->getRoles()[0] === "ROLE_TEACHER") {
             $teacher = $teacherRepository->findOneBy(['User'=>$user]);
             $coursList = $coursRepository->findBy(['Teacher'=>$teacher]);

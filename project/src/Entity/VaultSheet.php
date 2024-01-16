@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\VaultSheetRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: VaultSheetRepository::class)]
 class VaultSheet
@@ -17,10 +18,12 @@ class VaultSheet
 
     #[Groups(['vaultSheet:read'])]
     #[ORM\ManyToOne(inversedBy: 'vaultSheets')]
+    #[Assert\NotBlank(message: "L'utilisateur est obligatoire ou n'existe pas")]
     private ?User $User = null;
 
     #[Groups(['vaultSheet:read'])]
     #[ORM\ManyToOne(inversedBy: 'vaultSheets')]
+    #[Assert\NotBlank(message: "La partition est obligatoire ou n'existe pas")]
     private ?Sheet $Sheet = null;
 
     #[Groups(['vaultSheet:read'])]

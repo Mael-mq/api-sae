@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\User;
 use App\Entity\VaultSheet;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -21,8 +22,10 @@ class VaultSheetRepository extends ServiceEntityRepository
         parent::__construct($registry, VaultSheet::class);
     }
 
-    public function findAllWithPagination($offset, $limit) {
+    public function findAllWithPagination($offset, $limit, User $user) {
         $qb = $this->createQueryBuilder('b')
+            ->andWhere('b.User = :user')
+            ->setParameter('user', $user)
             ->setFirstResult(($offset - 1) * $limit)
             ->setMaxResults($limit);
         return $qb->getQuery()->getResult();
