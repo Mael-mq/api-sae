@@ -84,8 +84,9 @@ class SheetController extends AbstractController
 
         $content = $request->toArray();
         $idInstrument = $content['idInstrument'] ?? -1;
-
-        $updatedSheet->setInstrument($instrumentRepository->find($idInstrument));
+        if ($idInstrument != -1){
+            $updatedSheet->setInstrument($instrumentRepository->find($idInstrument));
+        }
         
         // Validation des données
         $errors = $validator->validate($updatedSheet);
