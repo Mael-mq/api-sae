@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Cours;
 use App\Entity\Messages;
 use App\Repository\CoursRepository;
 use App\Repository\MessagesRepository;
@@ -18,15 +19,17 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class MessagesController extends AbstractController
 {
-    #[Route('/api/messages', name: 'api_messages', methods: ['GET'])]
+    #[Route('/api/cours/{idCours}/messages', name: 'api_messages', methods: ['GET'])]
     public function getMessagesList(MessagesRepository $messagesRepository, UserRepository $userRepository, CoursRepository $coursRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
-        $content = $request->toArray();
-        $idCours = $content['idCours'] ?? -1;
-        if ($idCours == -1) {
+        $cours = $coursRepository->find($request->attributes->get('idCours'));
+
+        // si $cours n'est pas une instance de Cours, alors on retourne une erreur
+
+        if (!$cours instanceof Cours) {
             return new JsonResponse(null, JsonResponse::HTTP_BAD_REQUEST);
         }
-        $cours = $coursRepository->find($idCours);
+
         $user = $userRepository->getUserFromToken();
 
         $messagesList = $messagesRepository->getMessagesFromUser($cours, $user);
@@ -35,16 +38,21 @@ class MessagesController extends AbstractController
         return new JsonResponse ($jsonMessagesList, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
-    #[Route('/api/messages/{id}', name: 'api_messages_detail', methods: ['GET'])]
-    public function getMessagesDetail(Messages $messages, SerializerInterface $serializer): JsonResponse
+    #[Route('/api/cours/{idCours}/messages/{idMessages}', name: 'api_messages_detail', methods: ['GET'])]
+    public function getMessagesDetail(CoursRepository $coursRepository, MessagesRepository $messagesRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
+        $cours = $coursRepository->find($request->attributes->get('idCours'));
+        $messages = $messagesRepository->find($request->attributes->get('idMessages'));
+
         $jsonMessages = $serializer->serialize($messages, 'json', ['groups' => 'messages:read']);
         return new JsonResponse($jsonMessages, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
-    #[Route('/api/messages/{id}', name: 'api_cours_app_delete', methods: ['DELETE'])]
-    public function deleteMessage(Messages $messages, UserRepository $userRepository, EntityManagerInterface $em): JsonResponse
+    #[Route('/api/cours/{idCours}/messages/{idMessages}', name: 'api_cours_app_delete', methods: ['DELETE'])]
+    public function deleteMessage(MessagesRepository $messagesRepository, CoursRepository $coursRepository, UserRepository $userRepository, EntityManagerInterface $em, Request $request): JsonResponse
     {
+        $cours = $coursRepository->find($request->attributes->get('idCours'));
+        $messages = $messagesRepository->find($request->attributes->get('idMessages'));
         $user = $userRepository->getUserFromToken();
 
         if($messages->getSender() != $user && $messages->getReceiver() != $user) {
@@ -68,16 +76,13 @@ class MessagesController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-    #[Route('/api/messages', name: 'api_messages_create', methods: ['POST'])]
+    #[Route('/api/cours/{idCours}/messages', name: 'api_messages_create', methods: ['POST'])]
     public function createMessage(CoursRepository $coursRepository, Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, UserRepository $userRepository, ValidatorInterface $validator): JsonResponse
     {
+        $cours = $coursRepository->find($request->attributes->get('idCours'));
+        
         $requestContent = $request->toArray();
-
-        $idCours = $requestContent['idCours'] ?? -1;
-
         $messageContent = $requestContent['content'] ?? null;
-
-        $cours = $coursRepository->find($idCours);
         
         $sender = $userRepository->getUserFromToken();
         if($sender->getRoles()[0] == "ROLE_TEACHER"){
@@ -102,7 +107,7 @@ class MessagesController extends AbstractController
         $em->flush();
 
         $jsonMessage = $serializer->serialize($message, 'json', ['groups' => 'message:read']);
-        $location = $urlGenerator->generate('api_messages_detail', ['id' => $message->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+        $location = $urlGenerator->generate('api_messages_detail', ['idMessages' => $message->getId(), 'idCours' => $cours->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         return new JsonResponse($jsonMessage, Response::HTTP_CREATED, ["Location" => $location], true);
     }
