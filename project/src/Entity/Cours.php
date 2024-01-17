@@ -35,12 +35,18 @@ class Cours
     #[ORM\OneToMany(mappedBy: 'Cours', targetEntity: Messages::class)]
     private Collection $messages;
 
-    #[Groups(['cours:read'])]
     #[ORM\OneToMany(mappedBy: 'Cours', targetEntity: Files::class)]
     private Collection $files;
 
+
     #[ORM\OneToMany(mappedBy: 'Cours', targetEntity: Activities::class)]
     private Collection $activities;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $difficulty = null;
+
+    #[ORM\ManyToOne(inversedBy: 'cours')]
+    private ?Instrument $Instrument = null;
 
     public function __construct()
     {
@@ -195,6 +201,30 @@ class Cours
                 $activity->setCours(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDifficulty(): ?string
+    {
+        return $this->difficulty;
+    }
+
+    public function setDifficulty(?string $difficulty): static
+    {
+        $this->difficulty = $difficulty;
+
+        return $this;
+    }
+
+    public function getInstrument(): ?Instrument
+    {
+        return $this->Instrument;
+    }
+
+    public function setInstrument(?Instrument $Instrument): static
+    {
+        $this->Instrument = $Instrument;
 
         return $this;
     }

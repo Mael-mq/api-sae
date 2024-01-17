@@ -30,11 +30,15 @@ class Instrument
     #[ORM\OneToMany(mappedBy: 'Instrument', targetEntity: Sheet::class)]
     private Collection $sheets;
 
+    #[ORM\OneToMany(mappedBy: 'Instrument', targetEntity: Cours::class)]
+    private Collection $cours;
+
     public function __construct()
     {
         $this->coursApps = new ArrayCollection();
         $this->userInstruments = new ArrayCollection();
         $this->sheets = new ArrayCollection();
+        $this->cours = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -138,6 +142,36 @@ class Instrument
             // set the owning side to null (unless already changed)
             if ($sheet->getInstrument() === $this) {
                 $sheet->setInstrument(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Cours>
+     */
+    public function getCours(): Collection
+    {
+        return $this->cours;
+    }
+
+    public function addCour(Cours $cour): static
+    {
+        if (!$this->cours->contains($cour)) {
+            $this->cours->add($cour);
+            $cour->setInstrument($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCour(Cours $cour): static
+    {
+        if ($this->cours->removeElement($cour)) {
+            // set the owning side to null (unless already changed)
+            if ($cour->getInstrument() === $this) {
+                $cour->setInstrument(null);
             }
         }
 

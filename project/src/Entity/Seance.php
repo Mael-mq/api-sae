@@ -16,7 +16,7 @@ class Seance
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['seance:read', 'activities:read'])]
+    #[Groups(['seance:read', 'activities:read', 'cours:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'seances')]
@@ -25,17 +25,21 @@ class Seance
     private ?Cours $Cours = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(['seance:read'])]
+    #[Groups(['seance:read', 'cours:read'])]
     #[Assert\NotBlank(message: "Date de début obligatoire")]
     private ?\DateTimeInterface $startAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(['seance:read'])]
+    #[Groups(['seance:read', 'cours:read'])]
     #[Assert\NotBlank(message: "Date de fin obligatoire")]
     private ?\DateTimeInterface $endAt = null;
 
     #[ORM\OneToMany(mappedBy: 'Seance', targetEntity: Activities::class)]
     private Collection $activities;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['seance:read', 'cours:read'])]
+    private ?string $description = null;
 
     public function __construct()
     {
@@ -109,6 +113,18 @@ class Seance
                 $activity->setSeance(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
 
         return $this;
     }
