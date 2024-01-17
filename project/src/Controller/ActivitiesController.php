@@ -23,8 +23,12 @@ class ActivitiesController extends AbstractController
     #[Route('/api/cours/{idCours}/activities', name: 'api_activities', methods: ['GET'])]
     public function getActivitiesList(CoursRepository $coursRepository, ActivitiesRepository $activitiesRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
+        $offset = $request->get('offset', 1);
+        $limit = $request->get('limit', 5);
+
         $cours = $coursRepository->find($request->get('idCours'));
-        $activitiesList = $activitiesRepository->findBy(['Cours' => $cours]);
+        $activitiesList = $activitiesRepository->findAllWithPagination($offset, $limit, $cours);
+
         
         $jsonActivitiesList = $serializer->serialize($activitiesList, 'json', ['groups' => 'activities:read']);
         return new JsonResponse ($jsonActivitiesList, Response::HTTP_OK, ['accept' => 'json'], true);

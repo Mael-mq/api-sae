@@ -34,6 +34,7 @@ class Seance
     #[Assert\NotBlank(message: "Date de fin obligatoire")]
     private ?\DateTimeInterface $endAt = null;
 
+    #[Groups(['cours:read'])]
     #[ORM\OneToMany(mappedBy: 'Seance', targetEntity: Activities::class)]
     private Collection $activities;
 

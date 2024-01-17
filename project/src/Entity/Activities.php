@@ -14,10 +14,10 @@ class Activities
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['activities:read', 'cours:read'])]
+    #[Groups(['activities:read', 'cours:read', 'seance:read'])]
     private ?int $id = null;
 
-    #[Groups(['activities:read', 'cours:read'])]
+    #[Groups(['activities:read', 'cours:read', 'seance:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\NotBlank(message: "Le titre est obligatoire")]
     private ?string $title = null;

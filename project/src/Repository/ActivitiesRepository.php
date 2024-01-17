@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Activities;
+use App\Entity\Cours;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,6 +20,15 @@ class ActivitiesRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Activities::class);
+    }
+
+    public function findAllWithPagination($offset, $limit, Cours $cours) {
+        $qb = $this->createQueryBuilder('b')
+            ->andWhere('b.Cours = :cours')
+            ->setParameter('cours', $cours)
+            ->setFirstResult(($offset - 1) * $limit)
+            ->setMaxResults($limit);
+        return $qb->getQuery()->getResult();
     }
 
 //    /**
