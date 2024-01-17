@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\CoursAppRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -35,6 +36,14 @@ class CoursApp
 
     #[ORM\OneToMany(mappedBy: 'CoursApp', targetEntity: CoursAppUser::class)]
     private Collection $coursAppUsers;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\NotBlank(message: "La description est obligatoire")]
+    private ?string $description = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\NotBlank(message: "Le contenu est obligatoire")]
+    private ?string $content = null;
 
     public function __construct()
     {
@@ -108,6 +117,30 @@ class CoursApp
                 $coursAppUser->setCoursApp(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getContent(): ?string
+    {
+        return $this->content;
+    }
+
+    public function setContent(?string $content): static
+    {
+        $this->content = $content;
 
         return $this;
     }
