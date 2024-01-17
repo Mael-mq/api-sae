@@ -24,6 +24,10 @@ class Teacher
     #[ORM\OneToMany(mappedBy: 'Teacher', targetEntity: Cours::class)]
     private Collection $cours;
 
+    #[Groups(['teacher:read'])]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $city = null;
+
     public function __construct()
     {
         $this->cours = new ArrayCollection();
@@ -72,6 +76,18 @@ class Teacher
                 $cour->setTeacher(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCity(): ?string
+    {
+        return $this->city;
+    }
+
+    public function setCity(?string $city): static
+    {
+        $this->city = $city;
 
         return $this;
     }
