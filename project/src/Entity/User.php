@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -21,11 +22,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 180, unique: true)]
     #[Groups(['userInstrument:read', 'user:read', 'exerciceAppUser:read', 'coursAppUser:read', 'student:read', 'teacher:read', 'cours:read', 'messages:read'])]
+    #[Assert\NotBlank(message: "Email obligatoire")]
     private ?string $email = null;
 
     #[ORM\Column]
     #[Groups(['userInstrument:read', 'user:read', 'exerciceAppUser:read', 'coursAppUser:read', 'student:read', 'teacher:read', 'cours:read', 'messages:read'])]
     private array $roles = [];
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\NotBlank(message: "Nom obligatoire")]
+    #[Groups(['user:read', 'student:read', 'teacher:read', 'messages:read', 'cours:read'])]
+    private ?string $nom = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\NotBlank(message: "Prénom obligatoire")]
+    #[Groups(['user:read', 'student:read', 'teacher:read', 'messages:read', 'cours:read'])]
+    private ?string $prenom = null;
+
 
     /**
      * @var string The hashed password
@@ -316,6 +329,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $vaultSheet->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+
+    public function setNom(?string $nom): static
+    {
+        $this->nom = $nom;
+
+        return $this;
+    }
+
+    public function getPrenom(): ?string
+    {
+        return $this->prenom;
+    }
+
+    public function setPrenom(?string $prenom): static
+    {
+        $this->prenom = $prenom;
 
         return $this;
     }
