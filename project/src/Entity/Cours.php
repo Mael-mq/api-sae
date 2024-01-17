@@ -42,9 +42,11 @@ class Cours
     #[ORM\OneToMany(mappedBy: 'Cours', targetEntity: Activities::class)]
     private Collection $activities;
 
+    #[Groups(['cours:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $difficulty = null;
 
+    #[Groups(['cours:read'])]
     #[ORM\ManyToOne(inversedBy: 'cours')]
     private ?Instrument $Instrument = null;
 
