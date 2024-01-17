@@ -38,10 +38,12 @@ class CoursApp
     private Collection $coursAppUsers;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(["coursApp:read", 'coursAppUser:read'])]
     #[Assert\NotBlank(message: "La description est obligatoire")]
     private ?string $description = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(["coursApp:read", 'coursAppUser:read'])]
     #[Assert\NotBlank(message: "Le contenu est obligatoire")]
     private ?string $content = null;
 
