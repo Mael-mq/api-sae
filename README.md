@@ -17,8 +17,8 @@
 
 - Se mettre dans le bash du container `docker exec -it www_docker_symfony bash`
 - `cd project`
-- `php bin/console make:migration`
 - `php bin/console doctrine:migration:migrate`
+Si besoin refaire avec `php bin/console make:migration`
 
 ## Chemin vers les fichiers
 
