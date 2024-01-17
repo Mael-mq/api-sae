@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -71,5 +72,29 @@ class SheetController extends AbstractController
         $location = $urlGenerator->generate('api_sheets_detail', ['id' => $sheet->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         return new JsonResponse($jsonSheet, Response::HTTP_CREATED, ["Location" => $location], true);
+    }
+
+    #[Route('/api/sheets/{id}', name: 'api_sheets_update', methods: ['PUT'])]
+    public function updateSheets(Request $request, Sheet $currentSheet, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator, InstrumentRepository $instrumentRepository): JsonResponse 
+    {
+        $updatedSheet = $serializer->deserialize($request->getContent(), 
+                Sheet::class, 
+                'json', 
+                [AbstractNormalizer::OBJECT_TO_POPULATE => $currentSheet]);
+
+        $content = $request->toArray();
+        $idInstrument = $content['idInstrument'] ?? -1;
+
+        $updatedSheet->setInstrument($instrumentRepository->find($idInstrument));
+        
+        // Validation des données
+        $errors = $validator->validate($updatedSheet);
+        if (count($errors) > 0) {
+            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+        }
+
+        $em->persist($updatedSheet);
+        $em->flush();
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 }
