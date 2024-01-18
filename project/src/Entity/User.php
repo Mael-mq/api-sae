@@ -40,6 +40,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read', 'student:read', 'teacher:read', 'messages:read', 'cours:read'])]
     private ?string $prenom = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $gender = null;
 
     /**
      * @var string The hashed password
@@ -354,6 +356,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPrenom(?string $prenom): static
     {
         $this->prenom = $prenom;
+
+        return $this;
+    }
+
+    public function getGender(): ?string
+    {
+        return $this->gender;
+    }
+
+    public function setGender(?string $gender): static
+    {
+        $this->gender = $gender;
 
         return $this;
     }
