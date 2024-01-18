@@ -34,15 +34,17 @@ class ActivitiesController extends AbstractController
         return new JsonResponse ($jsonActivitiesList, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
-    #[Route('/api/cours/{idCours}/activities/{idActivities}', name: 'api_activities_detail', methods: ['GET'])]
-    public function getActivitiesDetail(Request $request, ActivitiesRepository $activitiesRepository, CoursRepository $coursRepository, SerializerInterface $serializer): JsonResponse
+
+    // Route déplacée dans CoursController car elle ne fonctionne pas ici
+    /* #[Route('/api/cours/{idCours}/activities/{idActivities}', name: 'api_activities_detail', methods: ['GET'])]
+    public function getActivitiesDetail(ActivitiesRepository $activitiesRepository, Request $request, CoursRepository $coursRepository, SerializerInterface $serializer): JsonResponse
     {
-        $activities = $activitiesRepository->find($request->get('idActivities'));
-        $cours = $coursRepository->find($request->get('idCours'));
+        $activities = $activitiesRepository->find($request->attributes->get('idActivities'));
 
         $jsonActivities = $serializer->serialize($activities, 'json', ['groups' => 'activities:read']);
         return new JsonResponse($jsonActivities, Response::HTTP_OK, ['accept' => 'json'], true);
-    }
+    } */
+    
 
     #[Route('/api/cours/{idCours}/activities/{idActivities}', name: 'api_activities_detail', methods: ['DELETE'])]
     public function deleteActivities(ActivitiesRepository $activitiesRepository, CoursRepository $coursRepository, Request $request, EntityManagerInterface $em): JsonResponse

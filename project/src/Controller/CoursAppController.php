@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Activities;
 use App\Entity\CoursApp;
 use App\Repository\CoursAppRepository;
 use App\Repository\InstrumentRepository;
@@ -31,6 +32,8 @@ class CoursAppController extends AbstractController
         $jsonCoursAppList = $serializer->serialize($coursAppList, 'json', ['groups' => 'coursApp:read']);
         return new JsonResponse ($jsonCoursAppList, Response::HTTP_OK, ['accept' => 'json'], true);
     }
+
+
 
     #[Route('/api/cours-app/{id}', name: 'api_cours_app_detail', methods: ['GET'])]
     public function getCoursAppDetail(CoursApp $coursApp, SerializerInterface $serializer): JsonResponse

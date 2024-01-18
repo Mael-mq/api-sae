@@ -27,6 +27,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     #[Groups(['userInstrument:read', 'user:read', 'exerciceAppUser:read', 'coursAppUser:read', 'student:read', 'teacher:read', 'cours:read', 'messages:read'])]
+    #[Assert\NotBlank(message: "Rôle obligatoire")]
     private array $roles = [];
 
     #[ORM\Column(length: 255, nullable: true)]
