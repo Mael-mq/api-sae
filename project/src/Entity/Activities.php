@@ -41,7 +41,7 @@ class Activities
     #[ORM\ManyToOne(inversedBy: 'activities')]
     private ?Sheet $Sheet = null;
 
-    #[Groups(['activities:read'])]
+    #[Groups(['activities:read', 'cours:read'])]
     #[Assert\NotBlank(message: "Le statut est obligatoire")]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $status = null;
