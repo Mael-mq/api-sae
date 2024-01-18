@@ -41,6 +41,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:read', 'student:read', 'teacher:read', 'messages:read', 'cours:read'])]
     private ?string $gender = null;
 
     /**
