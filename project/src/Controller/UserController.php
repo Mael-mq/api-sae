@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Student;
+use App\Entity\Teacher;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -42,9 +44,13 @@ class UserController extends AbstractController
         $user->setEmail($email);
         if($role === "student") {
             $user->setRoles(["ROLE_STUDENT", "ROLE_USER"]);
+            $student = new Student();
+            $student->setUser($user);
         }
         if($role === "teacher") {
             $user->setRoles(["ROLE_TEACHER", "ROLE_USER"]);
+            $teacher = new Teacher();
+            $teacher->setUser($user);
         }
         $user->setPassword($userPasswordHasherInterface->hashPassword($user, $password));
         $user->setNom($nom);
