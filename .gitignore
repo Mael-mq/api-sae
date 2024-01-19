@@ -7,7 +7,7 @@
 /project/public/bundles/
 /project/var/
 /project/vendor/
-/project/migrations/
+/env-bdd/
 ###< symfony/framework-bundle ###
 
 ###> lexik/jwt-authentication-bundle ###
