@@ -64,26 +64,28 @@ class UserInstrumentController extends AbstractController
     public function createUserInstrument(Request $request, UserRepository $userRepository, InstrumentRepository $instrumentRepository, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator): JsonResponse
     {
         $user = $userRepository->getUserFromToken();
-
-        $userInstrument = new UserInstrument();
-        $userInstrument->setUser($user);
-
+        
         $content = $request->toArray();
-        $idInstrument = $content['idInstrument'] ?? -1;
-        $instrument = $instrumentRepository->find($idInstrument);
-        $userInstrument->setInstrument($instrument);
+        $instrumentList = $content['instrumentList'] ?? -1;
+        if($instrumentList == -1){
+            return new JsonResponse("Vous devez spécifier une liste d'instruments.", Response::HTTP_BAD_REQUEST);
+        }
+        foreach($instrumentList as $instrumentId){
+            $userInstrument = new UserInstrument();
+            $userInstrument->setUser($user);
 
-        $errors = $validator->validate($userInstrument);
-        if(count($errors) > 0) {
-            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+            $instrument = $instrumentRepository->find($instrumentId);
+            $userInstrument->setInstrument($instrument);
+            $errors = $validator->validate($userInstrument);
+            if(count($errors) > 0) {
+                return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+            }
+            $em->persist($userInstrument);
+            $em->flush();
         }
 
-        $em->persist($userInstrument);
-        $em->flush();
-        
-
         $jsonUserInstrument = $serializer->serialize($userInstrument, 'json', ['groups' => 'userInstrument:read']);
-        $location = $urlGenerator->generate('api_user_instruments_detail', ['id' => $userInstrument->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+        $location = $urlGenerator->generate('api_user_instruments', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
         return new JsonResponse($jsonUserInstrument, Response::HTTP_CREATED, ["Location" => $location], true);
     }
