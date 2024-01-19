@@ -46,11 +46,15 @@ class UserController extends AbstractController
             $user->setRoles(["ROLE_STUDENT", "ROLE_USER"]);
             $student = new Student();
             $student->setUser($user);
+            $em->persist($student);
+            $em->flush();
         }
         if($role === "teacher") {
             $user->setRoles(["ROLE_TEACHER", "ROLE_USER"]);
             $teacher = new Teacher();
             $teacher->setUser($user);
+            $em->persist($teacher);
+            $em->flush();
         }
         $user->setPassword($userPasswordHasherInterface->hashPassword($user, $password));
         $user->setNom($nom);
