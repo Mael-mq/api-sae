@@ -84,4 +84,19 @@ class CoursController extends AbstractController
 
         return new JsonResponse($jsonCours, Response::HTTP_CREATED, ["Location" => $location], true);
     }
+
+    #[Route('/api/cours/{id}', name: 'api_cours_modify', methods: ['PUT'])]
+    public function modifyCours(Cours $cours, SerializerInterface $serializer, Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $content = $request->toArray();
+        if(isset($content['isPending']) && $content['isPending'] != null){
+            $cours->setIsPending($content['isPending']);
+        }
+
+        $em->persist($cours);
+        $em->flush();
+
+        $jsonCours = $serializer->serialize($cours, 'json', ['groups' => 'cours:read']);
+        return new JsonResponse($jsonCours, Response::HTTP_OK, ['accept' => 'json'], true);
+    }
 }

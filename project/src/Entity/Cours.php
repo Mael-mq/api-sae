@@ -43,12 +43,19 @@ class Cours
     private Collection $activities;
 
     #[Groups(['cours:read'])]
+    #[Assert\NotBlank(message: "La difficulté est obligatoire")]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $difficulty = null;
 
     #[Groups(['cours:read'])]
     #[ORM\ManyToOne(inversedBy: 'cours')]
+    #[Assert\NotBlank(message: "L'instrument' est obligatoire")]
     private ?Instrument $Instrument = null;
+
+    #[Groups(['cours:read'])]
+    #[ORM\Column(nullable: true)]
+    #[Assert\NotBlank(message: "Le statut isPending est obligatoire")]
+    private ?bool $isPending = null;
 
     public function __construct()
     {
@@ -227,6 +234,18 @@ class Cours
     public function setInstrument(?Instrument $Instrument): static
     {
         $this->Instrument = $Instrument;
+
+        return $this;
+    }
+
+    public function isIsPending(): ?bool
+    {
+        return $this->isPending;
+    }
+
+    public function setIsPending(?bool $isPending): static
+    {
+        $this->isPending = $isPending;
 
         return $this;
     }
