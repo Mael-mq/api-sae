@@ -87,9 +87,8 @@ class ActivitiesController extends AbstractController
     }
 
     #[Route('/api/cours/{idCours}/activities/{idActivities}', name: 'api_activities_update', methods: ['PUT'])]
-    public function updateActivities(Request $request, CoursRepository $coursRepository, SheetRepository $sheetRepository, SeanceRepository $seanceRepository, SerializerInterface $serializer, ActivitiesRepository $activitiesRepository, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse 
+    public function updateActivities(Request $request, SheetRepository $sheetRepository, SeanceRepository $seanceRepository, SerializerInterface $serializer, ActivitiesRepository $activitiesRepository, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse 
     {
-        $cours = $coursRepository->find($request->get('idCours'));
         $currentActivities = $activitiesRepository->find($request->get('idActivities'));
 
         $updatedActivities = $serializer->deserialize($request->getContent(), 
@@ -102,7 +101,6 @@ class ActivitiesController extends AbstractController
         $content = $request->toArray();
         $idSheet = $content['idSheet'] ?? -1;
         $updatedActivities->setSheet($sheetRepository->find($idSheet));
-        $updatedActivities->setCours($cours);
         
         // Validation des données
         $errors = $validator->validate($updatedActivities);
