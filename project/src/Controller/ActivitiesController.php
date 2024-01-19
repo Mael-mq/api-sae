@@ -35,7 +35,6 @@ class ActivitiesController extends AbstractController
     }
 
 
-    // Route déplacée dans CoursController car elle ne fonctionne pas ici
     #[Route('/api/cours/{idCours}/activities/{idActivities}', name: 'api_activities_detail', methods: ['GET'])]
     public function getActivitiesDetail(ActivitiesRepository $activitiesRepository, Request $request, CoursRepository $coursRepository, SerializerInterface $serializer): JsonResponse
     {
@@ -88,10 +87,10 @@ class ActivitiesController extends AbstractController
     }
 
     #[Route('/api/cours/{idCours}/activities/{idActivities}', name: 'api_activities_update', methods: ['PUT'])]
-    public function updateActivities(Request $request, SheetRepository $sheetRepository, SeanceRepository $seanceRepository, SerializerInterface $serializer, ActivitiesRepository $activitiesRepository, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse 
+    public function updateActivities(Request $request, CoursRepository $coursRepository, SheetRepository $sheetRepository, SeanceRepository $seanceRepository, SerializerInterface $serializer, ActivitiesRepository $activitiesRepository, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse 
     {
+        $cours = $coursRepository->find($request->get('idCours'));
         $currentActivities = $activitiesRepository->find($request->get('idActivities'));
-        $cours = $currentActivities->getCours();
 
         $updatedActivities = $serializer->deserialize($request->getContent(), 
                 Activities::class, 
@@ -101,10 +100,7 @@ class ActivitiesController extends AbstractController
         
         
         $content = $request->toArray();
-        $idSeance = $content['idSeance'] ?? -1;
         $idSheet = $content['idSheet'] ?? -1;
-        $seance = $seanceRepository->find($idSeance);
-        $updatedActivities->setSeance($seance);
         $updatedActivities->setSheet($sheetRepository->find($idSheet));
         $updatedActivities->setCours($cours);
         
