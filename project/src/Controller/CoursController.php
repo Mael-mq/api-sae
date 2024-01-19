@@ -84,14 +84,4 @@ class CoursController extends AbstractController
 
         return new JsonResponse($jsonCours, Response::HTTP_CREATED, ["Location" => $location], true);
     }
-
-    // Route déplacée depuis ActivitiesController.php car elle ne fonctionne pas dedans
-    #[Route('/api/cours/{idCours}/activities/{idActivities}', name: 'api_activities_detail', methods: ['GET'])]
-    public function getActivitiesDetail(ActivitiesRepository $activitiesRepository, Request $request, CoursRepository $coursRepository, SerializerInterface $serializer): JsonResponse
-    {
-        $activities = $activitiesRepository->find($request->attributes->get('idActivities'));
-
-        $jsonActivities = $serializer->serialize($activities, 'json', ['groups' => 'activities:read']);
-        return new JsonResponse($jsonActivities, Response::HTTP_OK, ['accept' => 'json'], true);
-    }
 }

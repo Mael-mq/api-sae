@@ -36,17 +36,17 @@ class ActivitiesController extends AbstractController
 
 
     // Route déplacée dans CoursController car elle ne fonctionne pas ici
-    /* #[Route('/api/cours/{idCours}/activities/{idActivities}', name: 'api_activities_detail', methods: ['GET'])]
+    #[Route('/api/cours/{idCours}/activities/{idActivities}', name: 'api_activities_detail', methods: ['GET'])]
     public function getActivitiesDetail(ActivitiesRepository $activitiesRepository, Request $request, CoursRepository $coursRepository, SerializerInterface $serializer): JsonResponse
     {
         $activities = $activitiesRepository->find($request->attributes->get('idActivities'));
 
         $jsonActivities = $serializer->serialize($activities, 'json', ['groups' => 'activities:read']);
         return new JsonResponse($jsonActivities, Response::HTTP_OK, ['accept' => 'json'], true);
-    } */
+    }
     
 
-    #[Route('/api/cours/{idCours}/activities/{idActivities}', name: 'api_activities_detail', methods: ['DELETE'])]
+    #[Route('/api/cours/{idCours}/activities/{idActivities}', name: 'api_activities_delete', methods: ['DELETE'])]
     public function deleteActivities(ActivitiesRepository $activitiesRepository, CoursRepository $coursRepository, Request $request, EntityManagerInterface $em): JsonResponse
     {
         $activities = $activitiesRepository->find($request->get('idActivities'));
