@@ -41,7 +41,7 @@ class UserController extends AbstractController
 
         $content = $request->toArray();
 
-        if(isset($content['id']) || isset($content['roles']) || isset($content['password'])) {
+        if(isset($content['id']) || isset($content['email']) || isset($content['roles']) || isset($content['password'])) {
             return new JsonResponse("Vous ne pouvez pas modifier ces informations", Response::HTTP_FORBIDDEN);
         }
         $updatedUser = $serializer->deserialize($request->getContent(), User::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $currentUser]);
