@@ -65,9 +65,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'User', targetEntity: ExerciceAppUser::class)]
     private Collection $exerciceAppUsers;
 
+    #[Groups(['user:read'])]
     #[ORM\OneToMany(mappedBy: 'User', targetEntity: Teacher::class)]
     private Collection $teachers;
 
+    #[Groups(['user:read'])]
     #[ORM\OneToMany(mappedBy: 'User', targetEntity: Student::class)]
     private Collection $students;
 

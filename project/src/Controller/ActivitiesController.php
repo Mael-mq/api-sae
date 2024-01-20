@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class ActivitiesController extends AbstractController
 {
     #[Route('/api/cours/{idCours}/activities', name: 'api_activities', methods: ['GET'])]
-    public function getActivitiesList(CoursRepository $coursRepository, UserRepository $userRepository, ActivitiesRepository $activitiesRepository, SerializerInterface $serializer, Request $request): JsonResponse
+    public function getActivitiesList(CoursRepository $coursRepository, ActivitiesRepository $activitiesRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
         $cours = $coursRepository->find($request->get('idCours'));
         /* if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){

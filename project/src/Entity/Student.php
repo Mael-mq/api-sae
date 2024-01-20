@@ -14,7 +14,7 @@ class Student
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['student:read', 'cours:read'])]
+    #[Groups(['student:read', 'cours:read', 'user:read'])]
     private ?int $id = null;
 
     #[Groups(['student:read', 'cours:read'])]

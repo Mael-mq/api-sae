@@ -14,7 +14,7 @@ class Teacher
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['teacher:read', 'cours:read'])]
+    #[Groups(['teacher:read', 'cours:read', 'user:read'])]
     private ?int $id = null;
 
     #[Groups(['teacher:read', 'cours:read'])]
@@ -24,7 +24,7 @@ class Teacher
     #[ORM\OneToMany(mappedBy: 'Teacher', targetEntity: Cours::class)]
     private Collection $cours;
 
-    #[Groups(['teacher:read'])]
+    #[Groups(['teacher:read', 'user:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $city = null;
 
