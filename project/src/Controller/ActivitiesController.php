@@ -100,8 +100,10 @@ class ActivitiesController extends AbstractController
         
         $content = $request->toArray();
         $idSheet = $content['idSheet'] ?? -1;
-        $updatedActivities->setSheet($sheetRepository->find($idSheet));
-        
+        if($idSheet != -1){
+            $updatedActivities->setSheet($sheetRepository->find($idSheet));
+        }
+
         // Validation des données
         $errors = $validator->validate($updatedActivities);
         if (count($errors) > 0) {
