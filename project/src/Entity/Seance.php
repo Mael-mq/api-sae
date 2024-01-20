@@ -16,7 +16,7 @@ class Seance
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['seance:read', 'activities:read', 'cours:read'])]
+    #[Groups(['seance:read', 'activities:read', 'cours:read', 'files:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'seances')]

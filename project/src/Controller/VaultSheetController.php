@@ -22,11 +22,8 @@ class VaultSheetController extends AbstractController
     #[Route('/api/vault-sheets', name: 'api_vault_sheets', methods: ['GET'])]
     public function getVaultList(VaultSheetRepository $vaultSheetRepository, UserRepository $userRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
-        $offset = $request->get('offset', 1);
-        $limit = $request->get('limit', 5);
-
         $user = $userRepository->getUserFromToken();
-        $vaultSheetList = $vaultSheetRepository->findAllWithPagination($offset, $limit, $user);
+        $vaultSheetList = $vaultSheetRepository->findBy(['User' => $user]);
         
         $jsonVaultSheetList = $serializer->serialize($vaultSheetList, 'json', ['groups' => 'vaultSheet:read']);
         return new JsonResponse ($jsonVaultSheetList, Response::HTTP_OK, ['accept' => 'json'], true);

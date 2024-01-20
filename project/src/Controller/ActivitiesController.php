@@ -7,6 +7,7 @@ use App\Repository\ActivitiesRepository;
 use App\Repository\CoursRepository;
 use App\Repository\SeanceRepository;
 use App\Repository\SheetRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,12 +22,16 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class ActivitiesController extends AbstractController
 {
     #[Route('/api/cours/{idCours}/activities', name: 'api_activities', methods: ['GET'])]
-    public function getActivitiesList(CoursRepository $coursRepository, ActivitiesRepository $activitiesRepository, SerializerInterface $serializer, Request $request): JsonResponse
+    public function getActivitiesList(CoursRepository $coursRepository, UserRepository $userRepository, ActivitiesRepository $activitiesRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
+        $cours = $coursRepository->find($request->get('idCours'));
+        /* if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'You are not allowed to access this resource.'], Response::HTTP_FORBIDDEN);
+        } */
+
         $offset = $request->get('offset', 1);
         $limit = $request->get('limit', 5);
-
-        $cours = $coursRepository->find($request->get('idCours'));
+        
         $activitiesList = $activitiesRepository->findAllWithPagination($offset, $limit, $cours);
 
         

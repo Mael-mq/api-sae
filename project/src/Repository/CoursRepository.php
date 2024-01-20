@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Cours;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,6 +20,18 @@ class CoursRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Cours::class);
+    }
+
+    public function isUserFromCours(Cours $cours, User $user): bool
+    {
+        $userTeacher = $cours->getTeacher()->getUser();
+        $userStudent = $cours->getStudent()->getUser();
+        
+        if($userTeacher !== $user && $userStudent !== $user){
+            return false;
+        }else{
+            return true;
+        }
     }
 
 //    /**

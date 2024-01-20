@@ -23,7 +23,7 @@ class SheetController extends AbstractController
     public function getSheetList(SheetRepository $sheetRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
         $offset = $request->get('offset', 1);
-        $limit = $request->get('limit', 5);
+        $limit = $request->get('limit', 15);
 
         $sheetList = $sheetRepository->findAllWithPagination($offset, $limit);
         
