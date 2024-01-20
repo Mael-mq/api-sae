@@ -13,11 +13,11 @@ class UserInstrument
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['userInstrument:read'])]
+    #[Groups(['userInstrument:read', 'teacher:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'userInstruments')]
-    #[Groups(['userInstrument:read'])]
+    #[Groups(['userInstrument:read', 'teacher:read'])]
     #[Assert\NotBlank(message: "L'instrument est obligatoire ou n'existe pas")]
     private ?Instrument $Instrument = null;
 

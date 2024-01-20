@@ -55,6 +55,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    #[Groups(['teacher:read'])]
     #[ORM\OneToMany(mappedBy: 'User', targetEntity: UserInstrument::class)]
     private Collection $userInstruments;
 
