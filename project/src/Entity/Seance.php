@@ -42,9 +42,13 @@ class Seance
     #[Groups(['seance:read', 'cours:read'])]
     private ?string $description = null;
 
+    #[ORM\OneToMany(mappedBy: 'Seance', targetEntity: Files::class)]
+    private Collection $files;
+
     public function __construct()
     {
         $this->activities = new ArrayCollection();
+        $this->files = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -126,6 +130,36 @@ class Seance
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Files>
+     */
+    public function getFiles(): Collection
+    {
+        return $this->files;
+    }
+
+    public function addFile(Files $file): static
+    {
+        if (!$this->files->contains($file)) {
+            $this->files->add($file);
+            $file->setSeance($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFile(Files $file): static
+    {
+        if ($this->files->removeElement($file)) {
+            // set the owning side to null (unless already changed)
+            if ($file->getSeance() === $this) {
+                $file->setSeance(null);
+            }
+        }
 
         return $this;
     }

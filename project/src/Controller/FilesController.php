@@ -6,6 +6,7 @@ use App\Entity\Cours;
 use App\Entity\Files;
 use App\Repository\CoursRepository;
 use App\Repository\FilesRepository;
+use App\Repository\SeanceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -49,9 +50,10 @@ class FilesController extends AbstractController
     }
 
     #[Route('/api/cours/{idCours}/files', name: 'api_upload_files', methods: ['POST'])]
-    public function uploadFiles(Request $request, CoursRepository $coursRepository, EntityManagerInterface $em, SerializerInterface $serializer, UrlGeneratorInterface $urlGenerator)
+    public function uploadFiles(Request $request, SeanceRepository $seanceRepository, CoursRepository $coursRepository, EntityManagerInterface $em, SerializerInterface $serializer, UrlGeneratorInterface $urlGenerator)
     {
         $cours = $coursRepository->find($request->attributes->get('idCours'));
+        $seance = $seanceRepository->find($request->attributes->get('idSeance'));
         $files = new Files();
 
         $files->setCours($cours);
@@ -65,12 +67,13 @@ class FilesController extends AbstractController
         }
 
         $files->setUploadedFile($file);
+        $files->setSeance($seance);
 
         $em->persist($files);
         $em->flush();
 
         $jsonFiles = $serializer->serialize($files, 'json', ['groups' => 'files:read']);
-        $location = $urlGenerator->generate('api_cours_app_detail', ['id' => $files->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+        $location = $urlGenerator->generate('api_files_detail', ['id' => $files->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         return new JsonResponse($jsonFiles, Response::HTTP_CREATED, ["Location" => $location], true);
     }

@@ -34,6 +34,10 @@ class Messages
     #[Groups(['messages:read'])]
     private ?User $Receiver = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['messages:read'])]
+    private ?bool $unread = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -83,6 +87,18 @@ class Messages
     public function setReceiver(?User $Receiver): static
     {
         $this->Receiver = $Receiver;
+
+        return $this;
+    }
+
+    public function isUnread(): ?bool
+    {
+        return $this->unread;
+    }
+
+    public function setUnread(?bool $unread): static
+    {
+        $this->unread = $unread;
 
         return $this;
     }

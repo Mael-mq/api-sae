@@ -37,6 +37,10 @@ class Files
     #[Vich\UploadableField(mapping: 'file_upload', fileNameProperty: 'filePath', size: 'fileSize')]
     private ?File $uploadedFile = null;
 
+    #[ORM\ManyToOne(inversedBy: 'files')]
+    #[Groups(['files:read'])]
+    private ?Seance $Seance = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -111,5 +115,17 @@ class Files
     public function getFileSize(): ?int
     {
         return $this->fileSize;
+    }
+
+    public function getSeance(): ?Seance
+    {
+        return $this->Seance;
+    }
+
+    public function setSeance(?Seance $Seance): static
+    {
+        $this->Seance = $Seance;
+
+        return $this;
     }
 }
