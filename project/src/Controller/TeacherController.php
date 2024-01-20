@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -74,5 +75,32 @@ class TeacherController extends AbstractController
         $location = $urlGenerator->generate('api_teachers_detail', ['id' => $teacher->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         return new JsonResponse($jsonTeacher, Response::HTTP_CREATED, ["Location" => $location], true);
+    }
+
+    #[Route('/api/teachers/{id}', name: 'api_teachers_update', methods: ['PUT'])]
+    public function updateTeacher(Request $request, SerializerInterface $serializer, UserRepository $userRepository, Teacher $currentTeacher, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse 
+    {
+        if($currentTeacher->getUser()->getUserIdentifier() != $userRepository->getUserFromToken()->getUserIdentifier()){
+            return new JsonResponse(['error' => 'You are not allowed to update this teacher.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $updatedTeacher = $serializer->deserialize($request->getContent(), 
+                Teacher::class, 
+                'json', 
+                [AbstractNormalizer::OBJECT_TO_POPULATE => $currentTeacher]);
+
+        
+        
+        $content = $request->toArray();
+        
+        // Validation des données
+        $errors = $validator->validate($updatedTeacher);
+        if (count($errors) > 0) {
+            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+        }
+
+        $em->persist($updatedTeacher);
+        $em->flush();
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 }
