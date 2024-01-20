@@ -54,6 +54,11 @@ class Sheet
     #[Assert\NotBlank(message: "Le style est obligatoire")]
     private ?string $style = null;
 
+    #[Groups(['sheet:read', 'vaultSheet:read'])]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\NotBlank(message: "La sharing key est obligatoire")]
+    private ?string $sharingKey = null;
+
     public function __construct()
     {
         $this->vaultSheets = new ArrayCollection();
@@ -193,6 +198,18 @@ class Sheet
     public function setStyle(?string $style): static
     {
         $this->style = $style;
+
+        return $this;
+    }
+
+    public function getSharingKey(): ?string
+    {
+        return $this->sharingKey;
+    }
+
+    public function setSharingKey(?string $sharingKey): static
+    {
+        $this->sharingKey = $sharingKey;
 
         return $this;
     }
