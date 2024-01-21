@@ -22,12 +22,12 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class ActivitiesController extends AbstractController
 {
     #[Route('/api/cours/{idCours}/activities', name: 'api_activities', methods: ['GET'])]
-    public function getActivitiesList(CoursRepository $coursRepository, ActivitiesRepository $activitiesRepository, SerializerInterface $serializer, Request $request): JsonResponse
+    public function getActivitiesList(UserRepository $userRepository, CoursRepository $coursRepository, ActivitiesRepository $activitiesRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
         $cours = $coursRepository->find($request->get('idCours'));
-        /* if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
-            return new JsonResponse(['error' => 'You are not allowed to access this resource.'], Response::HTTP_FORBIDDEN);
-        } */
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
 
         $offset = $request->get('offset', 1);
         $limit = $request->get('limit', 5);
@@ -41,9 +41,16 @@ class ActivitiesController extends AbstractController
 
 
     #[Route('/api/cours/{idCours}/activities/{idActivities}', name: 'api_activities_detail', methods: ['GET'])]
-    public function getActivitiesDetail(ActivitiesRepository $activitiesRepository, Request $request, CoursRepository $coursRepository, SerializerInterface $serializer): JsonResponse
+    public function getActivitiesDetail(UserRepository $userRepository, ActivitiesRepository $activitiesRepository, Request $request, CoursRepository $coursRepository, SerializerInterface $serializer): JsonResponse
     {
+        $cours = $coursRepository->find($request->get('idCours'));
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
         $activities = $activitiesRepository->find($request->attributes->get('idActivities'));
+        if($activities->getCours() != $cours){
+            return new JsonResponse(['error' => 'Cette activité ne fait pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
 
         $jsonActivities = $serializer->serialize($activities, 'json', ['groups' => 'activities:read']);
         return new JsonResponse($jsonActivities, Response::HTTP_OK, ['accept' => 'json'], true);
@@ -51,10 +58,17 @@ class ActivitiesController extends AbstractController
     
 
     #[Route('/api/cours/{idCours}/activities/{idActivities}', name: 'api_activities_delete', methods: ['DELETE'])]
-    public function deleteActivities(ActivitiesRepository $activitiesRepository, CoursRepository $coursRepository, Request $request, EntityManagerInterface $em): JsonResponse
+    public function deleteActivities(UserRepository $userRepository, ActivitiesRepository $activitiesRepository, CoursRepository $coursRepository, Request $request, EntityManagerInterface $em): JsonResponse
     {
         $activities = $activitiesRepository->find($request->get('idActivities'));
         $cours = $coursRepository->find($request->get('idCours'));
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+        $activities = $activitiesRepository->find($request->attributes->get('idActivities'));
+        if($activities->getCours() != $cours){
+            return new JsonResponse(['error' => 'Cette activité ne fait pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
 
         $em->remove($activities);
         $em->flush();
@@ -62,9 +76,12 @@ class ActivitiesController extends AbstractController
     }
 
     #[Route('/api/cours/{idCours}/activities', name: 'api_activities_create', methods: ['POST'])]
-    public function createActivities(Request $request, CoursRepository $coursRepository, SerializerInterface $serializer, SeanceRepository $seanceRepository, SheetRepository $sheetRepository, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
+    public function createActivities(UserRepository $userRepository, Request $request, CoursRepository $coursRepository, SerializerInterface $serializer, SeanceRepository $seanceRepository, SheetRepository $sheetRepository, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
     {
         $cours = $coursRepository->find($request->get('idCours'));
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
 
         $activities = $serializer->deserialize($request->getContent(), Activities::class, 'json');
         
@@ -92,8 +109,17 @@ class ActivitiesController extends AbstractController
     }
 
     #[Route('/api/cours/{idCours}/activities/{idActivities}', name: 'api_activities_update', methods: ['PUT'])]
-    public function updateActivities(Request $request, SheetRepository $sheetRepository, SeanceRepository $seanceRepository, SerializerInterface $serializer, ActivitiesRepository $activitiesRepository, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse 
+    public function updateActivities(CoursRepository $coursRepository, UserRepository $userRepository, Request $request, SheetRepository $sheetRepository, SeanceRepository $seanceRepository, SerializerInterface $serializer, ActivitiesRepository $activitiesRepository, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse 
     {
+        $cours = $coursRepository->find($request->get('idCours'));
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+        $activities = $activitiesRepository->find($request->attributes->get('idActivities'));
+        if($activities->getCours() != $cours){
+            return new JsonResponse(['error' => 'Cette activité ne fait pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+
         $currentActivities = $activitiesRepository->find($request->get('idActivities'));
 
         $updatedActivities = $serializer->deserialize($request->getContent(), 

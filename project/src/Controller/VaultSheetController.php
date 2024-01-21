@@ -23,6 +23,7 @@ class VaultSheetController extends AbstractController
     public function getVaultList(VaultSheetRepository $vaultSheetRepository, UserRepository $userRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
         $user = $userRepository->getUserFromToken();
+
         $vaultSheetList = $vaultSheetRepository->findBy(['User' => $user]);
         
         $jsonVaultSheetList = $serializer->serialize($vaultSheetList, 'json', ['groups' => 'vaultSheet:read']);
@@ -30,15 +31,29 @@ class VaultSheetController extends AbstractController
     }
 
     #[Route('/api/vault-sheets/{id}', name: 'api_vault_sheets_detail', methods: ['GET'])]
-    public function getVaultSheetDetail(VaultSheet $vaultSheet, SerializerInterface $serializer): JsonResponse
+    public function getVaultSheetDetail(UserRepository $userRepository, VaultSheet $vaultSheet, SerializerInterface $serializer): JsonResponse
     {
+        $userRequest = $vaultSheet->getUser()->getUserIdentifier();
+        $user = $userRepository->getUserFromToken()->getUserIdentifier();
+
+        if($userRequest != $user) {
+            return new JsonResponse("Vous n'avez pas les droits suffisants.", Response::HTTP_FORBIDDEN);
+        }
+
         $jsonVaultSheet = $serializer->serialize($vaultSheet, 'json', ['groups' => 'vaultSheet:read']);
         return new JsonResponse($jsonVaultSheet, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
     #[Route('/api/vault-sheets/{id}', name: 'api_vault_sheets_delete', methods: ['DELETE'])]
-    public function deleteVaultSheet(VaultSheet $vaultSheet, EntityManagerInterface $em): JsonResponse
+    public function deleteVaultSheet(UserRepository $userRepository, VaultSheet $vaultSheet, EntityManagerInterface $em): JsonResponse
     {
+        $userRequest = $vaultSheet->getUser()->getUserIdentifier();
+        $user = $userRepository->getUserFromToken()->getUserIdentifier();
+
+        if($userRequest != $user) {
+            return new JsonResponse("Vous n'avez pas les droits suffisants.", Response::HTTP_FORBIDDEN);
+        }
+
         $em->remove($vaultSheet);
         $em->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
@@ -76,13 +91,20 @@ class VaultSheetController extends AbstractController
     }
 
     #[Route('/api/vault-sheets/{id}', name: 'api_vault_sheet_update', methods: ['PUT'])]
-    public function updateVaultSheet(Request $request, SerializerInterface $serializer, VaultSheet $currentVaultSheet, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse 
+    public function updateVaultSheet(UserRepository $userRepository, Request $request, SerializerInterface $serializer, VaultSheet $currentVaultSheet, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse 
     {
         $updatedVaultSheet = $serializer->deserialize($request->getContent(), 
                 VaultSheet::class, 
                 'json', 
                 [AbstractNormalizer::OBJECT_TO_POPULATE => $currentVaultSheet]);
         
+        $userRequest = $updatedVaultSheet->getUser()->getUserIdentifier();
+        $user = $userRepository->getUserFromToken()->getUserIdentifier();
+
+        if($userRequest != $user) {
+            return new JsonResponse("Vous n'avez pas les droits suffisants.", Response::HTTP_FORBIDDEN);
+        }
+
         $errors = $validator->validate($updatedVaultSheet);
         if (count($errors) > 0) {
             return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);

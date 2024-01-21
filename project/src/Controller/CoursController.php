@@ -38,15 +38,23 @@ class CoursController extends AbstractController
     }
 
     #[Route('/api/cours/{id}', name: 'api_cours_detail', methods: ['GET'])]
-    public function getCoursDetail(Cours $cours, SerializerInterface $serializer): JsonResponse
+    public function getCoursDetail(UserRepository $userRepository, Cours $cours, SerializerInterface $serializer): JsonResponse
     {
+        if($userRepository->getUserFromToken() != $cours->getStudent()->getUser() && $userRepository->getUserFromToken() != $cours->getTeacher()->getUser()){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+
         $jsonCours = $serializer->serialize($cours, 'json', ['groups' => 'cours:read']);
         return new JsonResponse($jsonCours, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
     #[Route('/api/cours/{id}', name: 'api_cours_delete', methods: ['DELETE'])]
-    public function deleteCours(Cours $cours, EntityManagerInterface $em): JsonResponse
+    public function deleteCours(UserRepository $userRepository, Cours $cours, EntityManagerInterface $em): JsonResponse
     {
+        if($userRepository->getUserFromToken() != $cours->getStudent()->getUser() && $userRepository->getUserFromToken() != $cours->getTeacher()->getUser()){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+
         $em->remove($cours);
         $em->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);

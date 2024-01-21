@@ -24,6 +24,9 @@ class SeanceController extends AbstractController
     public function getSeanceList(SeanceRepository $seanceRepository, CoursRepository $coursRepository, UserRepository $userRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
         $cours = $coursRepository->find($request->attributes->get('idCours'));
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
 
         $seanceList = $seanceRepository->findBy(['Cours'=>$cours]);
         
@@ -32,9 +35,17 @@ class SeanceController extends AbstractController
     }
 
     #[Route('/api/cours/{idCours}/seances/{idSeance}', name: 'api_seances_detail', methods: ['GET'])]
-    public function getSeanceDetail(SeanceRepository $seanceRepository, SerializerInterface $serializer, Request $request): JsonResponse
+    public function getSeanceDetail(CoursRepository $coursRepository, UserRepository $userRepository, SeanceRepository $seanceRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
+        $cours = $coursRepository->find($request->attributes->get('idCours'));
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+
         $seance = $seanceRepository->find($request->attributes->get('idSeance'));
+        if($seance->getCours() != $cours){
+            return new JsonResponse(['error' => 'Ce message ne fait pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
 
         $jsonCoursApp = $serializer->serialize($seance, 'json', ['groups' => 'seance:read']);
         return new JsonResponse($jsonCoursApp, Response::HTTP_OK, ['accept' => 'json'], true);
@@ -42,9 +53,17 @@ class SeanceController extends AbstractController
 
     
     #[Route('/api/cours/{idCours}/seances/{idSeance}', name: 'api_seances_delete', methods: ['DELETE'])]
-    public function deleteSeance(SeanceRepository $seanceRepository, Request $request, EntityManagerInterface $em): JsonResponse
+    public function deleteSeance(CoursRepository $coursRepository, UserRepository $userRepository, SeanceRepository $seanceRepository, Request $request, EntityManagerInterface $em): JsonResponse
     {
+        $cours = $coursRepository->find($request->attributes->get('idCours'));
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+
         $seance = $seanceRepository->find($request->attributes->get('idSeance'));
+        if($seance->getCours() != $cours){
+            return new JsonResponse(['error' => 'Ce message ne fait pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
 
         $em->remove($seance);
         $em->flush();
@@ -52,11 +71,15 @@ class SeanceController extends AbstractController
     }
 
     #[Route('/api/cours/{idCours}/seances', name: 'api_seances_create', methods: ['POST'])]
-    public function createSeance(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, CoursRepository $coursRepository, ValidatorInterface $validator): JsonResponse
+    public function createSeance(Request $request, UserRepository $userRepository, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, CoursRepository $coursRepository, ValidatorInterface $validator): JsonResponse
     {
         $seance = $serializer->deserialize($request->getContent(), Seance::class, 'json');
         
         $cours = $coursRepository->find($request->attributes->get('idCours'));
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+
         $seance->setCours($cours);
 
         // Validation des données
@@ -75,9 +98,18 @@ class SeanceController extends AbstractController
     }
 
     #[Route('/api/cours/{idCours}/seances/{idSeance}', name: 'api_seances_update', methods: ['PUT'])]
-    public function updateSeance(Request $request, SeanceRepository $seanceRepository, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator, CoursRepository $coursRepository): JsonResponse 
+    public function updateSeance(UserRepository $userRepository, Request $request, SeanceRepository $seanceRepository, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator, CoursRepository $coursRepository): JsonResponse 
     {
         $currentSeance = $seanceRepository->find($request->attributes->get('idSeance'));
+
+        $cours = $coursRepository->find($request->attributes->get('idCours'));
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+
+        if($currentSeance->getCours() != $cours){
+            return new JsonResponse(['error' => 'Ce message ne fait pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
 
         $updatedSeance = $serializer->deserialize($request->getContent(), 
                 Seance::class, 

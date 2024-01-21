@@ -24,11 +24,8 @@ class MessagesController extends AbstractController
     public function getMessagesList(MessagesRepository $messagesRepository, UserRepository $userRepository, CoursRepository $coursRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
         $cours = $coursRepository->find($request->attributes->get('idCours'));
-
-        // si $cours n'est pas une instance de Cours, alors on retourne une erreur
-
-        if (!$cours instanceof Cours) {
-            return new JsonResponse(null, JsonResponse::HTTP_BAD_REQUEST);
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
         }
 
         $user = $userRepository->getUserFromToken();
@@ -40,10 +37,17 @@ class MessagesController extends AbstractController
     }
 
     #[Route('/api/cours/{idCours}/messages/{idMessages}', name: 'api_messages_detail', methods: ['GET'])]
-    public function getMessagesDetail(CoursRepository $coursRepository, MessagesRepository $messagesRepository, SerializerInterface $serializer, Request $request): JsonResponse
+    public function getMessagesDetail(UserRepository $userRepository, CoursRepository $coursRepository, MessagesRepository $messagesRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
         $cours = $coursRepository->find($request->attributes->get('idCours'));
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+
         $messages = $messagesRepository->find($request->attributes->get('idMessages'));
+        if($messages->getCours() != $cours){
+            return new JsonResponse(['error' => 'Ce message ne fait pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
 
         $jsonMessages = $serializer->serialize($messages, 'json', ['groups' => 'messages:read']);
         return new JsonResponse($jsonMessages, Response::HTTP_OK, ['accept' => 'json'], true);
@@ -52,9 +56,17 @@ class MessagesController extends AbstractController
     #[Route('/api/cours/{idCours}/messages/{idMessages}', name: 'api_cours_app_delete', methods: ['DELETE'])]
     public function deleteMessage(MessagesRepository $messagesRepository, CoursRepository $coursRepository, UserRepository $userRepository, EntityManagerInterface $em, Request $request): JsonResponse
     {
-        $cours = $coursRepository->find($request->attributes->get('idCours'));
-        $messages = $messagesRepository->find($request->attributes->get('idMessages'));
         $user = $userRepository->getUserFromToken();
+        $cours = $coursRepository->find($request->attributes->get('idCours'));
+        if($coursRepository->isUserFromCours($cours,$user) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $messages = $messagesRepository->find($request->attributes->get('idMessages'));
+        if($messages->getCours() != $cours){
+            return new JsonResponse(['error' => 'Ce message ne fait pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+
 
         if($messages->getSender() != $user && $messages->getReceiver() != $user) {
             return new JsonResponse(null, Response::HTTP_FORBIDDEN);
@@ -81,6 +93,9 @@ class MessagesController extends AbstractController
     public function createMessage(CoursRepository $coursRepository, Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, UserRepository $userRepository, ValidatorInterface $validator): JsonResponse
     {
         $cours = $coursRepository->find($request->attributes->get('idCours'));
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
         
         $requestContent = $request->toArray();
         $messageContent = $requestContent['content'] ?? null;
@@ -92,11 +107,12 @@ class MessagesController extends AbstractController
             $receiver = $cours->getTeacher()->getUser();
         }
 
-        $message = new Messages();
+        $message = $serializer->deserialize($request->getContent(), Messages::class, 'json');
         $message->setCours($cours);
         $message->setSender($sender);
         $message->setReceiver($receiver);
         $message->setContent($messageContent);
+        $message->setUnread($requestContent['unread'] ?? -1);
 
         // Validation des données
         $errors = $validator->validate($message);
@@ -114,9 +130,16 @@ class MessagesController extends AbstractController
     }
 
     #[Route('/api/cours/{idCours}/messages/{idMessages}', name: 'api_messages_modify', methods: ['PUT'])]
-    public function modifyMessages(Request $request, MessagesRepository $messagesRepository, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $em): JsonResponse
+    public function modifyMessages(CoursRepository $coursRepository, UserRepository $userRepository, Request $request, MessagesRepository $messagesRepository, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $em): JsonResponse
     {
+        $cours = $coursRepository->find($request->attributes->get('idCours'));
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
         $currentMessages = $messagesRepository->find($request->attributes->get('idMessages'));
+        if($currentMessages->getCours() != $cours){
+            return new JsonResponse(['error' => 'Ce message ne fait pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
 
         $updatedMessages = $serializer->deserialize($request->getContent(), Messages::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $currentMessages]);
 

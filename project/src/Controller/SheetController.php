@@ -75,6 +75,7 @@ class SheetController extends AbstractController
     }
 
     #[Route('/api/sheets/{id}', name: 'api_sheets_update', methods: ['PUT'])]
+    #[IsGranted("ROLE_ADMIN", message: "Vous n'avez pas les droits suffisants.")]
     public function updateSheets(Request $request, Sheet $currentSheet, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator, InstrumentRepository $instrumentRepository): JsonResponse 
     {
         $updatedSheet = $serializer->deserialize($request->getContent(), 

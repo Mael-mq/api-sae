@@ -7,6 +7,7 @@ use App\Entity\Files;
 use App\Repository\CoursRepository;
 use App\Repository\FilesRepository;
 use App\Repository\SeanceRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -19,9 +20,13 @@ use Symfony\Component\Serializer\SerializerInterface;
 class FilesController extends AbstractController
 {
     #[Route('/api/cours/{idCours}/files', name: 'api_files_list', methods: ['GET'])]
-    public function getFilesList(FilesRepository $filesRepository, CoursRepository $coursRepository, SerializerInterface $serializer, Request $request): JsonResponse
+    public function getFilesList(UserRepository $userRepository, FilesRepository $filesRepository, CoursRepository $coursRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
         $cours = $coursRepository->find($request->attributes->get('idCours'));
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+
         $filesList = $filesRepository->findBy(['Cours'=>$cours]);
         
         $jsonFilesList = $serializer->serialize($filesList, 'json', ['groups' => 'files:read']);
@@ -29,20 +34,34 @@ class FilesController extends AbstractController
     }
 
     #[Route('/api/cours/{idCours}/files/{idFiles}', name: 'api_files_detail', methods: ['GET'])]
-    public function getFilesDetail(FilesRepository $filesRepository, CoursRepository $coursRepository, SerializerInterface $serializer, Request $request): JsonResponse
+    public function getFilesDetail(UserRepository $userRepository, FilesRepository $filesRepository, CoursRepository $coursRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
         $files = $filesRepository->find($request->attributes->get('idFiles'));
         $cours = $coursRepository->find($request->attributes->get('idCours'));
+
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+        if($files->getCours() != $cours){
+            return new JsonResponse(['error' => 'Ce fichier ne fait pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
 
         $jsonFiles = $serializer->serialize($files, 'json', ['groups' => 'files:read']);
         return new JsonResponse($jsonFiles, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
     #[Route('/api/cours/{idCours}/files/{idFiles}', name: 'api_files_delete', methods: ['DELETE'])]
-    public function deleteFiles(FilesRepository $filesRepository, CoursRepository $coursRepository, Request $request, EntityManagerInterface $em): JsonResponse
+    public function deleteFiles(UserRepository $userRepository, FilesRepository $filesRepository, CoursRepository $coursRepository, Request $request, EntityManagerInterface $em): JsonResponse
     {
         $files = $filesRepository->find($request->attributes->get('idFiles'));
         $cours = $coursRepository->find($request->attributes->get('idCours'));
+
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+        if($files->getCours() != $cours){
+            return new JsonResponse(['error' => 'Ce fichier ne fait pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
         
         $em->remove($files);
         $em->flush();
@@ -50,9 +69,13 @@ class FilesController extends AbstractController
     }
 
     #[Route('/api/cours/{idCours}/files', name: 'api_upload_files', methods: ['POST'])]
-    public function uploadFiles(Request $request, SeanceRepository $seanceRepository, CoursRepository $coursRepository, EntityManagerInterface $em, SerializerInterface $serializer, UrlGeneratorInterface $urlGenerator)
+    public function uploadFiles(UserRepository $userRepository, Request $request, SeanceRepository $seanceRepository, CoursRepository $coursRepository, EntityManagerInterface $em, SerializerInterface $serializer, UrlGeneratorInterface $urlGenerator)
     {
         $cours = $coursRepository->find($request->attributes->get('idCours'));
+        if($coursRepository->isUserFromCours($cours,$userRepository->getUserFromToken()) == false){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+
         $seance = $seanceRepository->find($request->attributes->get('idSeance'));
         $files = new Files();
 
