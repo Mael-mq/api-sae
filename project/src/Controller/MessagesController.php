@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -110,5 +111,23 @@ class MessagesController extends AbstractController
         $location = $urlGenerator->generate('api_messages_detail', ['idMessages' => $message->getId(), 'idCours' => $cours->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         return new JsonResponse($jsonMessage, Response::HTTP_CREATED, ["Location" => $location], true);
+    }
+
+    #[Route('/api/cours/{idCours}/messages/{idMessages}', name: 'api_messages_modify', methods: ['PUT'])]
+    public function modifyMessages(Request $request, MessagesRepository $messagesRepository, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $em): JsonResponse
+    {
+        $currentMessages = $messagesRepository->find($request->attributes->get('idMessages'));
+
+        $updatedMessages = $serializer->deserialize($request->getContent(), Messages::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $currentMessages]);
+
+        // Validation des données
+        $errors = $validator->validate($updatedMessages);
+        if (count($errors) > 0) {
+            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+        }
+
+        $em->persist($updatedMessages);
+        $em->flush();
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 }

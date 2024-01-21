@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Cours;
 use App\Repository\ActivitiesRepository;
 use App\Repository\CoursRepository;
+use App\Repository\InstrumentRepository;
 use App\Repository\StudentRepository;
 use App\Repository\TeacherRepository;
 use App\Repository\UserRepository;
@@ -52,7 +53,7 @@ class CoursController extends AbstractController
     }
 
     #[Route('/api/cours', name: 'api_cours_create', methods: ['POST'])]
-    public function createCours(CoursRepository $coursRepository, Request $request, StudentRepository $studentRepository, TeacherRepository $teacherRepository, ValidatorInterface $validator, EntityManagerInterface $em, SerializerInterface $serializer, UrlGeneratorInterface $urlGenerator): JsonResponse
+    public function createCours(CoursRepository $coursRepository, InstrumentRepository $instrumentRepository, Request $request, StudentRepository $studentRepository, TeacherRepository $teacherRepository, ValidatorInterface $validator, EntityManagerInterface $em, SerializerInterface $serializer, UrlGeneratorInterface $urlGenerator): JsonResponse
     {
         $content = $request->toArray();
 
@@ -62,14 +63,19 @@ class CoursController extends AbstractController
         $idTeacher = $content['idTeacher'] ?? -1;
         $teacher = $teacherRepository->find($idTeacher);
 
-        $existingCours = $coursRepository->findOneBy(['Student'=>$student, 'Teacher'=>$teacher]);
+        $idInstrument = $content['idInstrument'] ?? -1;
+        
+        $instrument = $instrumentRepository->find($idInstrument);
+
+        $existingCours = $coursRepository->findOneBy(['Student'=>$student, 'Teacher'=>$teacher, 'Instrument'=>$instrument]);
         if ($existingCours) {
             return new JsonResponse("Ce cours existe déjà.", Response::HTTP_BAD_REQUEST);
         }
 
-        $cours = new Cours();
+        $cours = $serializer->deserialize($request->getContent(), Cours::class, 'json');
         $cours->setStudent($student);
         $cours->setTeacher($teacher);
+        $cours->setInstrument($instrument);
 
         $errors = $validator->validate($cours);
         if(count($errors) > 0) {
