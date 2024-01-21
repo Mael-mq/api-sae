@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -100,17 +101,20 @@ class CoursController extends AbstractController
     }
 
     #[Route('/api/cours/{id}', name: 'api_cours_modify', methods: ['PUT'])]
-    public function modifyCours(Cours $cours, SerializerInterface $serializer, Request $request, EntityManagerInterface $em): JsonResponse
+    public function modifyCours(Cours $currentCours, Request $request, UserRepository $userRepository, EntityManagerInterface $em, SerializerInterface $serializer): JsonResponse
     {
-        $content = $request->toArray();
-        if(isset($content['isPending']) && $content['isPending'] != null){
-            $cours->setIsPending($content['isPending']);
+        if($userRepository->getUserFromToken() != $currentCours->getStudent()->getUser() && $userRepository->getUserFromToken() != $currentCours->getTeacher()->getUser()){
+            return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
         }
 
-        $em->persist($cours);
+        $updatedCours = $serializer->deserialize($request->getContent(), 
+                Cours::class, 
+                'json', 
+                [AbstractNormalizer::OBJECT_TO_POPULATE => $currentCours]);
+
+        $em->persist($updatedCours);
         $em->flush();
 
-        $jsonCours = $serializer->serialize($cours, 'json', ['groups' => 'cours:read']);
-        return new JsonResponse($jsonCours, Response::HTTP_OK, ['accept' => 'json'], true);
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 }

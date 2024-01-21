@@ -54,7 +54,6 @@ class Cours
 
     #[Groups(['cours:read'])]
     #[ORM\Column(nullable: true)]
-    #[Assert\NotBlank(message: "Le statut isPending est obligatoire")]
     private ?bool $isPending = null;
 
     public function __construct()
