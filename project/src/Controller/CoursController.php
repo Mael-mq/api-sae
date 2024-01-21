@@ -56,6 +56,23 @@ class CoursController extends AbstractController
             return new JsonResponse(['error' => 'Vous ne faites pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
         }
 
+        $messages = $cours->getMessages();
+        foreach($messages as $message){
+            $em->remove($message);
+        }
+        $seances = $cours->getSeances();
+        foreach($seances as $seance){
+            $activities = $seance->getActivities();
+            foreach($activities as $activity){
+                $em->remove($activity);
+            }
+            $em->remove($seance);
+        }
+        $files = $cours->getFiles();
+        foreach($files as $file){
+            $em->remove($file);
+        }
+
         $em->remove($cours);
         $em->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
