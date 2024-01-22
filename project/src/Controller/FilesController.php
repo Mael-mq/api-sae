@@ -68,7 +68,7 @@ class FilesController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-    #[Route('/api/cours/{idCours}/files', name: 'api_upload_files', methods: ['POST'])]
+    #[Route('/api/cours/{idCours}/seance/{idSeance}/files', name: 'api_upload_files', methods: ['POST'])]
     public function uploadFiles(UserRepository $userRepository, Request $request, SeanceRepository $seanceRepository, CoursRepository $coursRepository, EntityManagerInterface $em, SerializerInterface $serializer, UrlGeneratorInterface $urlGenerator)
     {
         $cours = $coursRepository->find($request->attributes->get('idCours'));
