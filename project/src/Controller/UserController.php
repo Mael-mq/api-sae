@@ -17,6 +17,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
+
 
 class UserController extends AbstractController
 {
@@ -62,6 +64,14 @@ class UserController extends AbstractController
     {
         $content = $request->toArray();
         $email = $content['email'] ?? -1;
+
+        $emailConstraint = new EmailConstraint();
+        $emailConstraint->message = 'Email invalide';
+        $errorsEmail = $validator->validate($email,$emailConstraint);
+        if(count($errorsEmail) > 0) {
+            return new JsonResponse($serializer->serialize($errorsEmail, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+        }
+
         $role = $content['role'] ?? -1;
         $password = $content['password'] ?? -1;
         $nom = $content['nom'] ?? -1;
