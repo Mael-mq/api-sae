@@ -8,6 +8,7 @@
 /project/var/
 /project/vendor/
 /env-bdd/
+/README.md
 ###< symfony/framework-bundle ###
 
 ###> lexik/jwt-authentication-bundle ###
