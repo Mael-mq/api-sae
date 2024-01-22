@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ActivitiesRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -45,6 +47,15 @@ class Activities
     #[Assert\NotBlank(message: "Le statut est obligatoire")]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $status = null;
+
+    #[Groups(['activities:read'])]
+    #[ORM\OneToMany(mappedBy: 'Activities', targetEntity: Files::class)]
+    private Collection $files;
+
+    public function __construct()
+    {
+        $this->files = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -119,6 +130,36 @@ class Activities
     public function setStatus(?string $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Files>
+     */
+    public function getFiles(): Collection
+    {
+        return $this->files;
+    }
+
+    public function addFile(Files $file): static
+    {
+        if (!$this->files->contains($file)) {
+            $this->files->add($file);
+            $file->setActivities($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFile(Files $file): static
+    {
+        if ($this->files->removeElement($file)) {
+            // set the owning side to null (unless already changed)
+            if ($file->getActivities() === $this) {
+                $file->setActivities(null);
+            }
+        }
 
         return $this;
     }

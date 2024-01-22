@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Activities;
 use App\Repository\ActivitiesRepository;
 use App\Repository\CoursRepository;
+use App\Repository\FilesRepository;
 use App\Repository\SeanceRepository;
 use App\Repository\SheetRepository;
 use App\Repository\UserRepository;
@@ -68,6 +69,11 @@ class ActivitiesController extends AbstractController
         $activities = $activitiesRepository->find($request->attributes->get('idActivities'));
         if($activities->getCours() != $cours){
             return new JsonResponse(['error' => 'Cette activité ne fait pas partie de ce cours.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $files = $activities->getFiles();
+        foreach($files as $file){
+            $em->remove($file);
         }
 
         $em->remove($activities);

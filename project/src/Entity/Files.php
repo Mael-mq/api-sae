@@ -16,21 +16,21 @@ class Files
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['files:read'])]
+    #[Groups(['files:read', 'activities:read'])]
     private ?int $id = null;
 
-    #[Groups(['files:read'])]
+    #[Groups(['files:read', 'activities:read'])]
     #[ORM\ManyToOne(inversedBy: 'files')]
     private ?Cours $Cours = null;
 
-    #[Groups(['files:read'])]
+    #[Groups(['files:read', 'activities:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $filePath = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
 
-    #[Groups(['files:read'])]
+    #[Groups(['files:read', 'activities:read'])]
     #[ORM\Column(nullable: true)]
     private ?int $fileSize = null;
 
@@ -38,8 +38,11 @@ class Files
     private ?File $uploadedFile = null;
 
     #[ORM\ManyToOne(inversedBy: 'files')]
-    #[Groups(['files:read'])]
     private ?Seance $Seance = null;
+
+    #[ORM\ManyToOne(inversedBy: 'files')]
+    #[Groups(['files:read'])]
+    private ?Activities $Activities = null;
 
     public function getId(): ?int
     {
@@ -125,6 +128,18 @@ class Files
     public function setSeance(?Seance $Seance): static
     {
         $this->Seance = $Seance;
+
+        return $this;
+    }
+
+    public function getActivities(): ?Activities
+    {
+        return $this->Activities;
+    }
+
+    public function setActivities(?Activities $Activities): static
+    {
+        $this->Activities = $Activities;
 
         return $this;
     }
