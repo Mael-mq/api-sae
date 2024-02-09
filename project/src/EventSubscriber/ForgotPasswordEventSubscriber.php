@@ -44,7 +44,7 @@ final class ForgotPasswordEventSubscriber implements EventSubscriberInterface
         $user = $passwordToken->getUser();
 
         $message = (new Email())
-            ->from('no-reply@example.com')
+            ->from('contact@mael-mouquet.fr')
             ->to($user->getEmail())
             ->subject('Reset your password')
             ->html($this->twig->render(
