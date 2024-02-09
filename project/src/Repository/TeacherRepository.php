@@ -4,6 +4,9 @@ namespace App\Repository;
 
 use App\Entity\Teacher;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\Entity;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -16,9 +19,38 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class TeacherRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private EntityManagerInterface $em;
+
+    public function __construct(ManagerRegistry $registry, EntityManagerInterface $em)
     {
         parent::__construct($registry, Teacher::class);
+        $this->em = $em;
+    }
+
+    public function findAllWithFilter($instrument, $city, $difficulty, $frequence){
+        $qb = $this->em->createQueryBuilder();
+
+        $query = $qb->select('t')
+            ->from('App\Entity\Teacher', 't')
+            ->join('App\Entity\UserInstrument', 'ui', 'WITH', 't.User = ui.User')
+        ;
+        if($instrument){
+            $query->andWhere('ui.Instrument = :instrument')
+                ->setParameter('instrument', $instrument);
+        }
+        if($city){
+            $query->andWhere('t.city = :city')
+                ->setParameter('city', $city);
+        }
+        if($difficulty){
+            $query->andWhere('t.difficulty = :difficulty')
+                ->setParameter('difficulty', $difficulty);
+        }
+        if($frequence){
+            $query->andWhere('t.frequence = :frequence')
+                ->setParameter('frequence', $frequence);
+        }
+        return $query->getQuery()->getResult();
     }
 
 //    /**

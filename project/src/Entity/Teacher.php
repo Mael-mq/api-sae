@@ -28,6 +28,14 @@ class Teacher
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $city = null;
 
+    #[Groups(['teacher:read', 'user:read'])]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $difficulty = null;
+
+    #[Groups(['teacher:read', 'user:read'])]
+    #[ORM\Column(nullable: true)]
+    private ?float $frequence = null;
+
     public function __construct()
     {
         $this->cours = new ArrayCollection();
@@ -88,6 +96,30 @@ class Teacher
     public function setCity(?string $city): static
     {
         $this->city = $city;
+
+        return $this;
+    }
+
+    public function getDifficulty(): ?string
+    {
+        return $this->difficulty;
+    }
+
+    public function setDifficulty(?string $difficulty): static
+    {
+        $this->difficulty = $difficulty;
+
+        return $this;
+    }
+
+    public function getFrequence(): ?float
+    {
+        return $this->frequence;
+    }
+
+    public function setFrequence(?float $frequence): static
+    {
+        $this->frequence = $frequence;
 
         return $this;
     }

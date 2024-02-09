@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Teacher;
+use App\Repository\InstrumentRepository;
 use App\Repository\StudentRepository;
 use App\Repository\TeacherRepository;
 use App\Repository\UserRepository;
@@ -20,9 +21,16 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class TeacherController extends AbstractController
 {
     #[Route('/api/teachers', name: 'api_teachers', methods: ['GET'])]
-    public function getTeacherList(TeacherRepository $teacherRepository, SerializerInterface $serializer): JsonResponse
+    public function getTeacherList(Request $request, TeacherRepository $teacherRepository, SerializerInterface $serializer, InstrumentRepository $instrumentRepository): JsonResponse
     {
-        $teacherList = $teacherRepository->findAll();
+        $instrumentId = $request->get('instrument', null);
+        $instrument = $instrumentRepository->findOneBy(['id' => $instrumentId]);
+        $city = $request->get('city', null);
+        $difficulty = $request->get('difficulty', null);
+        $frequence = $request->get('frequence', null);
+
+        $teacherList = $teacherRepository->findAllWithFilter($instrument, $city, $difficulty, $frequence);
+        
         $jsonTeacherList = $serializer->serialize($teacherList, 'json', ['groups' => 'teacher:read']);
         return new JsonResponse ($jsonTeacherList, Response::HTTP_OK, ['accept' => 'json'], true);
     }
