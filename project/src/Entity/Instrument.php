@@ -14,11 +14,11 @@ class Instrument
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["coursApp:read", "instrument:read", "userInstrument:read", "sheet:read", "vaultSheet:read", "cours:read", "teacher:read", "student:read"])]
+    #[Groups(["coursApp:read", "instrument:read", "userInstrument:read", "sheet:read", "vaultSheet:read", "cours:read", "teacher:read", "student:read", "customSheet:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["coursApp:read", "instrument:read", "userInstrument:read", "sheet:read", "vaultSheet:read", "cours:read", "teacher:read", "student:read"])]
+    #[Groups(["coursApp:read", "instrument:read", "userInstrument:read", "sheet:read", "vaultSheet:read", "cours:read", "teacher:read", "student:read", "customSheet:read"])]
     private ?string $Name = null;
 
     #[ORM\OneToMany(mappedBy: 'Instrument', targetEntity: CoursApp::class)]
@@ -33,12 +33,16 @@ class Instrument
     #[ORM\OneToMany(mappedBy: 'Instrument', targetEntity: Cours::class)]
     private Collection $cours;
 
+    #[ORM\OneToMany(mappedBy: 'Instrument', targetEntity: CustomSheet::class)]
+    private Collection $customSheets;
+
     public function __construct()
     {
         $this->coursApps = new ArrayCollection();
         $this->userInstruments = new ArrayCollection();
         $this->sheets = new ArrayCollection();
         $this->cours = new ArrayCollection();
+        $this->customSheets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -172,6 +176,36 @@ class Instrument
             // set the owning side to null (unless already changed)
             if ($cour->getInstrument() === $this) {
                 $cour->setInstrument(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CustomSheet>
+     */
+    public function getCustomSheets(): Collection
+    {
+        return $this->customSheets;
+    }
+
+    public function addCustomSheet(CustomSheet $customSheet): static
+    {
+        if (!$this->customSheets->contains($customSheet)) {
+            $this->customSheets->add($customSheet);
+            $customSheet->setInstrument($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCustomSheet(CustomSheet $customSheet): static
+    {
+        if ($this->customSheets->removeElement($customSheet)) {
+            // set the owning side to null (unless already changed)
+            if ($customSheet->getInstrument() === $this) {
+                $customSheet->setInstrument(null);
             }
         }
 

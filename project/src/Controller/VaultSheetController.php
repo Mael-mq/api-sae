@@ -59,7 +59,7 @@ class VaultSheetController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-    #[Route('/api/vault-sheets', name: 'api_cours_app_create', methods: ['POST'])]
+    #[Route('/api/vault-sheets', name: 'api_vault_sheet_create', methods: ['POST'])]
     public function createVaultSheet(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, SheetRepository $sheetRepository, UserRepository $userRepository, ValidatorInterface $validator): JsonResponse
     {
         $vaultSheet = $serializer->deserialize($request->getContent(), VaultSheet::class, 'json');
@@ -85,7 +85,7 @@ class VaultSheetController extends AbstractController
         $em->flush();
 
         $jsonVaultSheet = $serializer->serialize($vaultSheet, 'json', ['groups' => 'vaultSheet:read']);
-        $location = $urlGenerator->generate('api_cours_app_detail', ['id' => $vaultSheet->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+        $location = $urlGenerator->generate('api_vault_sheet_detail', ['id' => $vaultSheet->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         return new JsonResponse($jsonVaultSheet, Response::HTTP_CREATED, ["Location" => $location], true);
     }

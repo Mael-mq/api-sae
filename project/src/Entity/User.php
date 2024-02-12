@@ -18,7 +18,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read', 'cours:read', 'messages:read', 'vaultSheet:read', 'teacher:read','student:read', 'password_token'])]
+    #[Groups(['user:read', 'cours:read', 'messages:read', 'vaultSheet:read', 'teacher:read','student:read', 'password_token', 'customSheet:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
@@ -33,12 +33,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\NotBlank(message: "Nom obligatoire")]
-    #[Groups(['user:read', 'student:read', 'teacher:read', 'messages:read', 'cours:read'])]
+    #[Groups(['user:read', 'student:read', 'teacher:read', 'messages:read', 'cours:read', 'customSheet:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\NotBlank(message: "Prénom obligatoire")]
-    #[Groups(['user:read', 'student:read', 'teacher:read', 'messages:read', 'cours:read'])]
+    #[Groups(['user:read', 'student:read', 'teacher:read', 'messages:read', 'cours:read', 'customSheet:read'])]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -76,6 +76,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'User', targetEntity: VaultSheet::class)]
     private Collection $vaultSheets;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: CustomSheet::class)]
+    private Collection $customSheets;
+
+    #[ORM\OneToMany(mappedBy: 'User', targetEntity: VaultCustomSheet::class)]
+    private Collection $vaultCustomSheets;
+
     public function __construct()
     {
         $this->userInstruments = new ArrayCollection();
@@ -84,6 +90,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->teachers = new ArrayCollection();
         $this->students = new ArrayCollection();
         $this->vaultSheets = new ArrayCollection();
+        $this->customSheets = new ArrayCollection();
+        $this->vaultCustomSheets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -389,6 +397,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CustomSheet>
+     */
+    public function getCustomSheets(): Collection
+    {
+        return $this->customSheets;
+    }
+
+    public function addCustomSheet(CustomSheet $customSheet): static
+    {
+        if (!$this->customSheets->contains($customSheet)) {
+            $this->customSheets->add($customSheet);
+            $customSheet->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCustomSheet(CustomSheet $customSheet): static
+    {
+        if ($this->customSheets->removeElement($customSheet)) {
+            // set the owning side to null (unless already changed)
+            if ($customSheet->getAuthor() === $this) {
+                $customSheet->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, VaultCustomSheet>
+     */
+    public function getVaultCustomSheets(): Collection
+    {
+        return $this->vaultCustomSheets;
+    }
+
+    public function addVaultCustomSheet(VaultCustomSheet $vaultCustomSheet): static
+    {
+        if (!$this->vaultCustomSheets->contains($vaultCustomSheet)) {
+            $this->vaultCustomSheets->add($vaultCustomSheet);
+            $vaultCustomSheet->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVaultCustomSheet(VaultCustomSheet $vaultCustomSheet): static
+    {
+        if ($this->vaultCustomSheets->removeElement($vaultCustomSheet)) {
+            // set the owning side to null (unless already changed)
+            if ($vaultCustomSheet->getUser() === $this) {
+                $vaultCustomSheet->setUser(null);
+            }
+        }
 
         return $this;
     }
