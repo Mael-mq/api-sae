@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\CustomSheet;
+use App\Entity\VaultCustomSheet;
 use App\Repository\CustomSheetRepository;
 use App\Repository\InstrumentRepository;
 use App\Repository\UserRepository;
@@ -69,6 +70,15 @@ class CustomSheetController extends AbstractController
         }
         
         $em->persist($customSheet);
+        $em->flush();
+
+        $vaultCustomSheet = new VaultCustomSheet();
+
+        $vaultCustomSheet->setCustomSheet($customSheet);
+        $vaultCustomSheet->setUser($userRepository->getUserFromToken());
+        $vaultCustomSheet->setIsFavorite(false);
+
+        $em->persist($vaultCustomSheet);
         $em->flush();
 
         $jsonSheet = $serializer->serialize($customSheet, 'json', ['groups' => 'customSheet:read']);

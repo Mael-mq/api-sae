@@ -28,7 +28,6 @@ class VaultCustomSheet
 
     #[Groups(['customSheet:read'])]
     #[ORM\Column(nullable: true)]
-    #[Assert\NotBlank(message: "IsFavorite est obligatoire")]
     private ?bool $isFavorite = null;
 
     public function getId(): ?int

@@ -26,7 +26,7 @@ class VaultCustomSheetController extends AbstractController
 
         $vaultCustomSheetList = $vaultCustomSheetRepository->findBy(['User' => $user]);
         
-        $jsonVaultSheetList = $serializer->serialize($vaultCustomSheetList, 'json', ['groups' => 'vaultSheet:read']);
+        $jsonVaultSheetList = $serializer->serialize($vaultCustomSheetList, 'json', ['groups' => 'customSheet:read']);
         return new JsonResponse ($jsonVaultSheetList, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
@@ -40,7 +40,7 @@ class VaultCustomSheetController extends AbstractController
             return new JsonResponse("Vous n'avez pas les droits suffisants.", Response::HTTP_FORBIDDEN);
         }
 
-        $jsonVaultCustomSheet = $serializer->serialize($vaultCustomSheet, 'json', ['groups' => 'vaultSheet:read']);
+        $jsonVaultCustomSheet = $serializer->serialize($vaultCustomSheet, 'json', ['groups' => 'customSheet:read']);
         return new JsonResponse($jsonVaultCustomSheet, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
@@ -71,10 +71,6 @@ class VaultCustomSheetController extends AbstractController
         $user = $userRepository->getUserFromToken();
         $vaultCustomSheet->setUser($user);
 
-        if(!isset($content['isFavorite'])){
-            $vaultCustomSheet->setIsFavorite(false);
-        }
-
         // Validation des données
         $errors = $validator->validate($vaultCustomSheet);
         if (count($errors) > 0) {
@@ -84,33 +80,29 @@ class VaultCustomSheetController extends AbstractController
         $em->persist($vaultCustomSheet);
         $em->flush();
 
-        $jsonVaultCustomSheet = $serializer->serialize($vaultCustomSheet, 'json', ['groups' => 'vaultSheet:read']);
-        $location = $urlGenerator->generate('api_vault_custom_sheet_detail', ['id' => $vaultCustomSheet->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+        $jsonVaultCustomSheet = $serializer->serialize($vaultCustomSheet, 'json', ['groups' => 'customSheet:read']);
+        $location = $urlGenerator->generate('api_vault_custom_sheets_detail', ['id' => $vaultCustomSheet->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         return new JsonResponse($jsonVaultCustomSheet, Response::HTTP_CREATED, ["Location" => $location], true);
     }
 
     #[Route('/api/vault-custom-sheets/{id}', name: 'api_vault_custom_sheet_update', methods: ['PUT'])]
-    public function updateVaultCustomSheet(UserRepository $userRepository, Request $request, SerializerInterface $serializer, VaultCustomSheet $currentVaultCustomSheet, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse 
+    public function updateVaultCustomSheet(UserRepository $userRepository, Request $request, SerializerInterface $serializer, VaultCustomSheet $vaultCustomSheet, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse 
     {
-        $updatedVaultCustomSheet = $serializer->deserialize($request->getContent(), 
-                VaultCustomSheet::class, 
-                'json', 
-                [AbstractNormalizer::OBJECT_TO_POPULATE => $currentVaultCustomSheet]);
-        
-        $userRequest = $updatedVaultCustomSheet->getUser()->getUserIdentifier();
+        $userRequest = $vaultCustomSheet->getUser()->getUserIdentifier();
         $user = $userRepository->getUserFromToken()->getUserIdentifier();
 
         if($userRequest != $user) {
             return new JsonResponse("Vous n'avez pas les droits suffisants.", Response::HTTP_FORBIDDEN);
         }
 
-        $errors = $validator->validate($updatedVaultCustomSheet);
-        if (count($errors) > 0) {
-            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+        $content = $request->toArray();
+
+        if($content['isFavorite'] === true || $content['isFavorite'] === false){
+            $vaultCustomSheet->setIsFavorite($content['isFavorite']);
         }
 
-        $em->persist($updatedVaultCustomSheet);
+        $em->persist($vaultCustomSheet);
         $em->flush();
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }

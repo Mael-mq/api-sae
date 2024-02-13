@@ -46,7 +46,6 @@ class CustomSheet
     #[Assert\NotBlank(message: "L'auteur est obligatoire ou n'existe pas")]
     private ?User $author = null;
 
-    #[Groups(['customSheet:read'])]
     #[ORM\OneToMany(mappedBy: 'CustomSheet', targetEntity: VaultCustomSheet::class)]
     private Collection $vaultCustomSheets;
 
