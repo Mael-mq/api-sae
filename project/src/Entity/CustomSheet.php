@@ -38,16 +38,16 @@ class CustomSheet
 
     #[Groups(['customSheet:read'])]
     #[ORM\ManyToOne(inversedBy: 'customSheets')]
-    #[Assert\NotBlank(message: "L'instrument est obligatoire ou n'existe pas")]
-    private ?Instrument $Instrument = null;
-
-    #[Groups(['customSheet:read'])]
-    #[ORM\ManyToOne(inversedBy: 'customSheets')]
     #[Assert\NotBlank(message: "L'auteur est obligatoire ou n'existe pas")]
     private ?User $author = null;
 
     #[ORM\OneToMany(mappedBy: 'CustomSheet', targetEntity: VaultCustomSheet::class)]
     private Collection $vaultCustomSheets;
+
+    #[Groups(['customSheet:read'])]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\NotBlank(message: "La score key est obligatoire")]
+    private ?string $instrument = null;
 
     public function __construct()
     {
@@ -107,14 +107,14 @@ class CustomSheet
         return $this;
     }
 
-    public function getInstrument(): ?Instrument
+    public function getInstrument(): ?string
     {
-        return $this->Instrument;
+        return $this->instrument;
     }
 
-    public function setInstrument(?Instrument $Instrument): static
+    public function setInstrument(?string $instrument): static
     {
-        $this->Instrument = $Instrument;
+        $this->instrument = $instrument;
 
         return $this;
     }

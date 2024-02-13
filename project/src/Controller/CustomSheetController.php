@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\CustomSheet;
 use App\Entity\VaultCustomSheet;
 use App\Repository\CustomSheetRepository;
-use App\Repository\InstrumentRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -53,15 +52,12 @@ class CustomSheetController extends AbstractController
     }
 
     #[Route('/api/custom-sheets', name: 'api_custom_sheets_create', methods: ['POST'])]
-    public function createCustomSheet(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, InstrumentRepository $instrumentRepository, UserRepository $userRepository, ValidatorInterface $validator): JsonResponse
+    public function createCustomSheet(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, UserRepository $userRepository, ValidatorInterface $validator): JsonResponse
     {
         $customSheet = $serializer->deserialize($request->getContent(), CustomSheet::class, 'json');
         
         $content = $request->toArray();
 
-        $idInstrument = $content['idInstrument'] ?? -1;
-        
-        $customSheet->setInstrument($instrumentRepository->find($idInstrument));
         $customSheet->setAuthor($userRepository->getUserFromToken());
 
         $errors = $validator->validate($customSheet);
@@ -88,7 +84,7 @@ class CustomSheetController extends AbstractController
     }
 
     #[Route('/api/custom-sheets/{id}', name: 'api_custom_sheets_update', methods: ['PUT'])]
-    public function updateCustomSheets(Request $request, CustomSheet $currentCustomSheet, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator, UserRepository $userRepository, InstrumentRepository $instrumentRepository): JsonResponse 
+    public function updateCustomSheets(Request $request, CustomSheet $currentCustomSheet, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator, UserRepository $userRepository): JsonResponse 
     {
         if($currentCustomSheet->getAuthor() != $userRepository->getUserFromToken()){
             return new JsonResponse("Vous n'avez pas les droits suffisants.", Response::HTTP_FORBIDDEN);
@@ -100,10 +96,6 @@ class CustomSheetController extends AbstractController
                 [AbstractNormalizer::OBJECT_TO_POPULATE => $currentCustomSheet]);
 
         $content = $request->toArray();
-        $idInstrument = $content['idInstrument'] ?? -1;
-        if ($idInstrument != -1){
-            $updatedCustomSheet->setInstrument($instrumentRepository->find($idInstrument));
-        }
         
         // Validation des données
         $errors = $validator->validate($updatedCustomSheet);
