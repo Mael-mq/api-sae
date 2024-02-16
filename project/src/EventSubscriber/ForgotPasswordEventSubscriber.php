@@ -50,7 +50,7 @@ final class ForgotPasswordEventSubscriber implements EventSubscriberInterface
             ->html($this->twig->render(
                 'reset-password-mail.html.twig',
                 [
-                    'reset_password_url' => sprintf('https://www.example.com/forgot-password/%s', $passwordToken->getToken()),
+                    'reset_password_url' => sprintf('https://harmonize-app.mael-mouquet.fr/forgot-password/%s', $passwordToken->getToken()),
                 ]
             ));
         $this->mailer->send($message);
