@@ -42,12 +42,12 @@ class Cours
     #[ORM\OneToMany(mappedBy: 'Cours', targetEntity: Activities::class)]
     private Collection $activities;
 
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:read', 'seance:read'])]
     #[Assert\NotBlank(message: "La difficulté est obligatoire")]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $difficulty = null;
 
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:read', 'seance:read'])]
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[Assert\NotBlank(message: "L'instrument' est obligatoire")]
     private ?Instrument $Instrument = null;
