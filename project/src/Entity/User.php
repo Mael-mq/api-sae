@@ -18,7 +18,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read', 'cours:read', 'messages:read', 'vaultSheet:read', 'teacher:read','student:read', 'password_token', 'customSheet:read'])]
+    #[Groups(['user:read', 'cours:read', 'messages:read', 'vaultSheet:read', 'teacher:read','student:read', 'password_token', 'customSheet:read', 'seance:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
@@ -33,12 +33,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\NotBlank(message: "Nom obligatoire")]
-    #[Groups(['user:read', 'student:read', 'teacher:read', 'messages:read', 'cours:read', 'customSheet:read'])]
+    #[Groups(['user:read', 'student:read', 'teacher:read', 'messages:read', 'cours:read', 'customSheet:read', 'seance:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\NotBlank(message: "Prénom obligatoire")]
-    #[Groups(['user:read', 'student:read', 'teacher:read', 'messages:read', 'cours:read', 'customSheet:read'])]
+    #[Groups(['user:read', 'student:read', 'teacher:read', 'messages:read', 'cours:read', 'customSheet:read', 'seance:read'])]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255, nullable: true)]

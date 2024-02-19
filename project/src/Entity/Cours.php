@@ -18,7 +18,7 @@ class Cours
     #[Groups(['cours:read', 'seance:read', 'messages:read', 'files:read', 'activities:read'])]
     private ?int $id = null;
 
-    #[Groups(['cours:read'])]
+    #[Groups(['cours:read', 'seance:read'])]
     #[ORM\ManyToOne(inversedBy: 'cours')]
     #[Assert\NotBlank(message: "L'élève est obligatoire ou n'existe pas")]
     private ?Student $Student = null;
