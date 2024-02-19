@@ -31,6 +31,30 @@ class UserController extends AbstractController
         return new JsonResponse ($jsonUser, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
+    #[Route('/api/user-seances', name: 'api_user')]
+    public function getUserSeances(UserRepository $userRepository, SerializerInterface $serializer): JsonResponse
+    {
+        $user = $userRepository->getUserFromToken();
+
+        if($user->getRoles()[0] === "ROLE_STUDENT") {
+            $userSeances = [];
+            foreach($user->getStudents()[0]->getCours() as $cours) {
+                $userSeances[] = $cours->getSeances();
+            }
+            $jsonSeances = $serializer->serialize($userSeances, 'json', ['groups' => 'seance:read']);
+        }
+
+        if($user->getRoles()[0] === "ROLE_TEACHER") {
+            $userSeances = [];
+            foreach($user->getTeachers()[0]->getCours() as $cours) {
+                $userSeances[] = $cours->getSeances();
+            }
+            $jsonSeances = $serializer->serialize($userSeances, 'json', ['groups' => 'seance:read']);
+        }
+
+        return new JsonResponse ($jsonSeances, Response::HTTP_OK, ['accept' => 'json'], true);
+    }
+
     #[Route('/api/user/{idUser}', name: 'api_user_modify', methods: ['PUT'])]
     public function modifyUser(Request $request, UserRepository $userRepository, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $em): JsonResponse
     {
