@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 
 class UserController extends AbstractController
 {
-    #[Route('/api/user', name: 'api_user')]
+    #[Route('/api/user', name: 'api_user', methods: ['GET'])]
     public function getUserInfos(UserRepository $userRepository, SerializerInterface $serializer): JsonResponse
     {
         $user = $userRepository->getUserFromToken();
@@ -31,7 +31,7 @@ class UserController extends AbstractController
         return new JsonResponse ($jsonUser, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
-    #[Route('/api/user-seances', name: 'api_user')]
+    #[Route('/api/user-seances', name: 'api_user_seances', methods: ['GET'])]
     public function getUserSeances(UserRepository $userRepository, SerializerInterface $serializer): JsonResponse
     {
         $user = $userRepository->getUserFromToken();
